@@ -90,15 +90,25 @@ void sr_handlepacket(struct sr_instance* sr,
     
     /*etnet hdr size*/
     uint8_t* ip_hdr_size = sizeof(sr_ip_hdr_t);
-
+	
+    if (ntohs(etnet_hdr->ether_type) == ethertype_arp) {
+	//handle_arpIncomingMessage(packet, sr, len); may be sr_handle_arp
+	return 0;
+    }
+    else if (ntohs(etnet_hdr->ether_type) == ethertype_ip) {
+	//handle_arpIncomingMessage(packet, sr, len); may be sr_handle_arp
+	return 0;
+    }
     
     if (len < etnet_hdr_size){
-	    /* Send ICMP Msg */
+	/* Send ICMP Msg */
         return -1;
     }
     
     
 }/* end sr_ForwardPacket */
 
-
+void sr_handle_arp() 
+{
+}
 

@@ -71,14 +71,18 @@ void sr_handlepacket(struct sr_instance* sr,
         unsigned int len,
         char* interface/* lent */)
 {
-  /* REQUIRES */
-  assert(sr);
-  assert(packet);
-  assert(interface);
+    /* REQUIRES */
+    assert(sr);
+    assert(packet);
+    assert(interface);
 
-  printf("*** -> Received packet of length %d \n",len);
-
-  /* fill in code here */
+    printf("*** -> Received packet of length %d \n",len);
+  
+    sr_ethernet_hdr_t* etnet_hdr;
+    etnet_hdr = (sr_ethernet_hdr_t *)packet;
+    
+    sr_ip_hdr_t* ip_hdr;
+    /* fill in code here */
 
 }/* end sr_ForwardPacket */
 

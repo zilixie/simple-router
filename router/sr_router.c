@@ -78,11 +78,27 @@ void sr_handlepacket(struct sr_instance* sr,
 
     printf("*** -> Received packet of length %d \n",len);
   
+    /*etnet hdr*/
     sr_ethernet_hdr_t* etnet_hdr;
     etnet_hdr = (sr_ethernet_hdr_t *)packet;
     
-    sr_ip_hdr_t* ip_hdr;
-    /* fill in code here */
+    /*etnet hdr size*/
+    uint8_t* etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+    
+    /*ip hdr*/
+    sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
+    
+    /*etnet hdr size*/
+    uint8_t* ip_hdr_size = sizeof(sr_ip_hdr_t);
 
+    
+    if (len < etnet_hdr_size){
+	    /* Send ICMP Msg */
+        return -1;
+    }
+    
+    
 }/* end sr_ForwardPacket */
+
+
 

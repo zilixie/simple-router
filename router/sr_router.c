@@ -67,13 +67,13 @@ void sr_init(struct sr_instance* sr)
  *---------------------------------------------------------------------*/
 
 void sr_handlepacket(struct sr_instance* sr,
-        uint8_t * packet/* lent */,
-        unsigned int len,
-        char* interface/* lent */)
+		     uint8_t * packet/* lent */,
+		     unsigned int len,
+		     char* interface/* lent */)
 {
-    /* REQUIRES */
-    assert(sr);
-    assert(packet);
+	/* REQUIRES */
+	assert(sr);
+	assert(packet);
     assert(interface);
 
     printf("*** -> Received packet of length %d \n",len);
@@ -108,7 +108,72 @@ void sr_handlepacket(struct sr_instance* sr,
     
 }/* end sr_ForwardPacket */
 
-void sr_handle_arp() 
+void sr_handlearp(uint8_t *packet, 
+		  struct sr_instance *sr, 
+		  unsigned int len) 
 {
+	struct sr_arpreq *req;
+	/* arp hdr*/
+	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
+	if (ntohs(arp_header->ar_op) == arp_op_reply) {
+		
+	}
+}
+
+void handle_arpIncomingMessage(uint8_t *packet, struct sr_instance *sr, unsigned int len) {
+	/* NOTE TO USE THE ETHERNET PROTOCOL ENUM FOR ARP messages AND also in ARP header to denote it's an ARP reply */	
+	struct sr_if *currIface;
+	struct sr_packet *pendingPkt;
+	struct sr_arp_hdr *arp_hdr;
+	struct sr_arpreq *req;
+	
+	/* Extract ARP header */
+	arp_hdr = (struct sr_arp_hdr*)(packet + sizeof(struct sr_ethernet_hdr));
+		
+	/* Check to see if reply or request */
+	if (arp_hdr->ar_op == arp_op_reply) {
+		req = sr_arpcache_insert(&(sr->cache), arp_hdr->ar_sha, arp_hdr->ar_sip); /* Sender's ip and mac */
+		if (req){ 
+			pendingPkt = req->packets;
+			/* forward all packets from the req's queue on to that destination */
+			while (pendingPkt != NULL) {
+				/* CHECK: that it sends (FOR DEBUG PURPOSES) */
+				/* Change ethernet addresses */
+				struct sr_ethernet_hdr* pendingEtherHeader = (struct sr_ethernet_hdr*)pendingPkt->buf;
+				memcpy(pendingEtherHeader->ether_dhost, arp_hdr->ar_sha, ETHER_ADDR_LEN * sizeof(uint8_t));
+				struct sr_if* pendingIface = sr_get_interface(sr, pendingPkt->iface);
+				memcpy(pendingEtherHeader->ether_shost, pendingIface->addr, ETHER_ADDR_LEN * sizeof(uint8_t));
+				
+				sr_send_packet(sr, pendingPkt->buf, pendingPkt->len, pendingPkt->iface);
+				pendingPkt = pendingPkt->next;
+			}
+			
+			sr_arpreq_destroy(&(sr->cache), req);
+		}
+	} else {
+		/* Go through linked list of interfaces, check their IP vs the destination IP of the ARP request packet */
+		currIface = sr->if_list;
+		while (currIface != NULL) {
+			/* Check if packet is intended for us */
+			if (currIface->ip == arp_hdr->ar_tip) {
+				/* Create ARP reply packet (encapsulate in ethernet frame) and send to source of ARP request */
+				struct sr_ethernet_hdr* ether_hdr = (struct sr_ethernet_hdr*)packet;
+				/* The recipient MAC address will be the original sender's */
+				memcpy(&ether_hdr->ether_dhost, &ether_hdr->ether_shost, ETHER_ADDR_LEN);
+				/* The sending MAC address will be the interface's */
+				memcpy(&ether_hdr->ether_shost, currIface->addr, ETHER_ADDR_LEN);
+				arp_hdr->ar_op = arp_op_reply;
+				arp_hdr->ar_tip = arp_hdr->ar_sip;
+				arp_hdr->ar_sip = currIface->ip;
+				memcpy(&arp_hdr->ar_tha, &arp_hdr->ar_sha, ETHER_ADDR_LEN);
+				memcpy(&arp_hdr->ar_sha, currIface->addr, ETHER_ADDR_LEN);
+				
+				sr_send_packet(sr, packet, len, currIface->name);
+				break;
+			}
+			currIface = currIface->next;
+		}
+		
+	}
 }
 

@@ -112,10 +112,19 @@ void sr_handlearp(uint8_t *packet,
 		  struct sr_instance *sr, 
 		  unsigned int len) 
 {
-	struct sr_arpreq *req;
 	/* arp hdr*/
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
-	if (ntohs(arp_header->ar_op) == arp_op_reply) {
+	if (ntohs(arp_header->ar_op) == arp_op_request) {
+		struct sr_arpreq *request = sr_arpcache_insert(&(sr->cache), arp_hdr->ar_sha, arp_hdr->ar_sip);
+		
+		/* Delete */
+		if !(request){
+			sr_arpreq_destroy(cache, request);
+		}
+		/*
+			1) If ARP Request in Cache, add it anyway
+			2) If ARP Request not in Cache, add it, remove from queue if was in queue
+		*/
 		
 	}
 }

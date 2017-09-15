@@ -122,6 +122,25 @@ void sr_handlearp(uint8_t *packet,
 			sr_arpreq_destroy(cache, request);
 		}
 		/* reply*/
+		sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet;
+		sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
+		struct sr_if * interface_struct = sr_get_interface(sr, interface);
+	/*
+		 Set ARP op_code -> reply
+		 Set ARP target ip to source ip
+		 Set ARP source ip to our ip (from interface)
+	*/
+
+		arp_header->ar_op = htons(arp_op_reply);
+		arp_header->ar_tip = arp_header->ar_sip;
+		arp_header->ar_sip = interface_struct->ip;
+
+		set_arp_sha_tha(arp_header, interface_struct->addr, arp_header->ar_sha);
+
+	/* Swap Ethernet dest/src addrs */
+		set_ethernet_src_dst(ethernet_header, interface_struct->addr, ethernet_header->ether_shost);
+
+		sr_send_packet(sr, packet, len, interface);
 		/*
 			1) If ARP Request in Cache, add it anyway
 			2) If ARP Request not in Cache, add it, remove from queue if was in queue

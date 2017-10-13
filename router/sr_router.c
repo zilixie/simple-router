@@ -71,9 +71,9 @@ void sr_handlepacket(struct sr_instance* sr,
 		     unsigned int len,
 		     char* interface/* lent */)
 {
-	/* REQUIRES */
-	assert(sr);
-	assert(packet);
+    /* REQUIRES */
+    assert(sr);
+    assert(packet);
     assert(interface);
 
     printf("*** -> Received packet of length %d \n",len);

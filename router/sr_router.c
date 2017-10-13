@@ -110,7 +110,8 @@ void sr_handlepacket(struct sr_instance* sr,
 
 void sr_handlearp(uint8_t *packet, 
 		  struct sr_instance *sr, 
-		  unsigned int len) 
+		  unsigned int len,
+		  char* interface/* lent */) 
 {
 	/* arp hdr*/
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
@@ -121,6 +122,8 @@ void sr_handlearp(uint8_t *packet,
 		if !(request){
 			sr_arpreq_destroy(cache, request);
 		}
+		
+		
 		/* reply*/
 		sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet;
 		sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
@@ -148,3 +151,11 @@ void sr_handlearp(uint8_t *packet,
 		
 	}
 }
+
+
+
+void sr_handle_ip_packet(struct sr_instance* sr,
+				uint8_t * packet/* lent */,
+				unsigned int len,
+				char* interface/* lent */)
+{

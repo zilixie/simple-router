@@ -95,10 +95,10 @@ void sr_handlepacket(struct sr_instance *sr,
 
     if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
     	//handle_arp(sr, packet_copy, len, interface);
-		return 0;
+	return 0;
     }
     else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
-		//handle_ip
+	//handle_ip
     	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
     	//valid checksum
     	ip_hdr->ip_sum = 0;
@@ -223,4 +223,16 @@ void replace_arp_hardware_adds(sr_arp_hdr_t * arp_header, unsigned char * new_sh
 
 void construct_arp_hdr(sr_arp_hdr_t *arp_hdr) {
 
+}
+
+int validate_ip_cksum (uint8_t * packet) {
+	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
+	uint16_t hdr_cksum = ip_header->ip_sum;
+	ip_header->ip_sum = (uint16_t) 0;
+	uint16_t check_sum = cksum(ip_header, sizeof(sr_ip_hdr_t));
+	ip_header->ip_sum = original_checksum;
+	if (check_sum == original_checksum) {
+		return 1;
+	}
+	return 0;
 }

@@ -229,10 +229,10 @@ int validate_ip_cksum (uint8_t * packet) {
 	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	uint16_t hdr_cksum = ip_header->ip_sum;
 	ip_header->ip_sum = (uint16_t) 0;
-	uint16_t check_sum = cksum(ip_header, sizeof(sr_ip_hdr_t));
-	ip_header->ip_sum = original_checksum;
-	if (check_sum == original_checksum) {
-		return 1;
+	if (hdr_cksum != cksum(ip_header, sizeof(sr_ip_hdr_t)) {
+		ip_header->ip_sum = hdr_cksum;
+		return -1;
 	}
+	ip_header->ip_sum = hdr_cksum;
 	return 0;
 }

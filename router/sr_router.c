@@ -95,10 +95,10 @@ void sr_handlepacket(struct sr_instance *sr,
 
     if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
     	//handle_arp(sr, packet_copy, len, interface);
-	return 0;
+		return 0;
     }
     else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
-	//handle_ip
+		//handle_ip
     	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
     	//valid checksum
     	ip_hdr->ip_sum = 0;
@@ -134,7 +134,13 @@ void sr_handle_ip_packet(struct sr_instance* sr,
 				unsigned int len,
 				char* interface/* lent */)
 {
-	
+	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
+
+	if(! validate_ip_cksum(packet) ){
+		printf("not valid ip packet\n");
+		return;	
+	}
+	struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);
 }
 
 
@@ -229,10 +235,50 @@ int validate_ip_cksum (uint8_t * packet) {
 	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	uint16_t hdr_cksum = ip_header->ip_sum;
 	ip_header->ip_sum = (uint16_t) 0;
-	if (hdr_cksum != cksum(ip_header, sizeof(sr_ip_hdr_t)) {
+	if (hdr_cksum != cksum(ip_header, ip_header->ip_len)) {
 		ip_header->ip_sum = hdr_cksum;
-		return -1;
+		return 0;
 	}
 	ip_header->ip_sum = hdr_cksum;
+	return 1;
+}
+
+struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
+    struct sr_rt* routing_table = sr->routing_table;
+	struct sr_rt* longest_match = NULL;
+
+    uint32_t curr_mask = 0;
+    
+    while(routing_table)
+    {
+        if(longest_match = NULL || routing_table->mask.s_addr > curr_mask)
+        {
+        	uint32_t mask = routing_table->mask.s_addr;
+            if((ip_dst & mask) == (routing_table->dest.s_addr & mask))
+            {
+            	longest_match = routing_table;
+                curr_mask = routing_table->mask.s_addr;
+            } 
+        }
+        routing_table = routing_table->next;
+    }
+    return longest_match;
+}
+
+int  ip_in_sr_if_list(struct sr_instance* sr, uint32_t dest_ip)
+{
+	struct sr_if* if_walker = 0;
+
+    /* -- REQUIRES -- */
+
+    assert(sr);
+
+    if_walker = sr->if_list;
+	while(if_walker){
+		if(if_walker->ip == dest_ip){
+			return 1;		
+		}
+		if_walker = if_walker->next;	
+	}
 	return 0;
 }

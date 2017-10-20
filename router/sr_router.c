@@ -375,8 +375,7 @@ struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
     return longest_match;
 }
 
-int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst)
-{
+int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst){
 	struct sr_if* interface_pt = sr->if_list;
 
 	while(interface_pt){
@@ -391,17 +390,14 @@ int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst)
 }
 	
 struct sr_rt* sr_get_rt_by_gateway(struct sr_instance* sr, uint32_t gateway) {
-  assert(sr);
+	struct sr_rt *rt_walker = sr->routing_table;
 
-  struct sr_rt *rt_walker = sr->routing_table;
-
-  while(rt_walker) {
-    if (rt_walker->gw.s_addr == gateway) {
-      return rt_walker;
-    }
-    rt_walker = rt_walker->next;
-  }
-
-  return 0;
+	while(rt_walker) {
+		if (rt_walker->gw.s_addr == gateway) {
+			return rt_walker;
+		}
+	rt_walker = rt_walker->next;
+	}
+  	return 0;
 }
 

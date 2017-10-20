@@ -207,23 +207,28 @@ void sr_handle_ip_packet(struct sr_instance* sr,
 
 
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
-	struct sr_arpcache *cache = &(sr->cache);
-	struct sr_packet *packet;
-	struct sr_if *currIface;
-	time_t now;
-	now = time(NULL);
-	if (difftime(now, req->sent) > 1.0) {
-		if (req->times_sent >= 5) {
-			packet = req->packets;			
-			while (packet != NULL) {
+	//struct sr_arpcache *cache = &(sr->cache);
+	//struct sr_if *currIface;
+	time_t now = time(0);
+	time_t last_sent = arp_req->sent;
+	uint32_t tiems_sent = arp_req->times_sent;
+	
+	struct sr_packet *pkt_pt;
+	struct sr_arpcache *cache
+	
+	if (difftime(now, last_sent) > 1.0) {
+		if (tiems_sent >= 5) {
+			pkt_pt = arp_req->packets;			
+			while (pkt_pt) {
 				/* Send type 3 code 1 ICMP (Host Unreachable) */
 				create_send_icmpMessage(sr, packet->buf, 3, 1, packet->iface);
 				packet = packet->next;
 			}
 			/* Destroy the request afterwards */
 			sr_arpreq_destroy(cache, req);
+			
 		} else {
-			/* BROADCAST ARP request */
+			/* send arp request */
 			uint8_t* broadcast_packet = malloc(sizeof(struct sr_ethernet_hdr) + sizeof(struct sr_arp_hdr));
 			unsigned int new_pkt_len = sizeof(struct sr_ethernet_hdr) + sizeof(struct sr_arp_hdr);
 			struct sr_ethernet_hdr* new_ether_hdr = (struct sr_ethernet_hdr*)broadcast_packet;
@@ -383,5 +388,20 @@ int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst)
 		}
 	}
 	return 0;
+}
+	
+struct sr_rt* sr_get_rt_by_gateway(struct sr_instance* sr, uint32_t gateway) {
+  assert(sr);
+
+  struct sr_rt *rt_walker = sr->routing_table;
+
+  while(rt_walker) {
+    if (rt_walker->gw.s_addr == gateway) {
+      return rt_walker;
+    }
+    rt_walker = rt_walker->next;
+  }
+
+  return 0;
 }
 

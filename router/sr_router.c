@@ -393,12 +393,11 @@ int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst){
 	
 struct sr_rt* get_Node_From_RoutingTable(struct sr_instance* sr, uint32_t ip){
 	struct sr_rt *rt = sr->routing_table;
-
-  while(rt) {
-    if (rt->gw.s_addr == ip) {
-      return rt;
-    }
-    rt = rt->next;
-  }
-return NULL;
+  	while(rt) {
+		if (rt->gw.s_addr == ip) {
+			return rt;
+		}
+		rt = rt->next;
+  	}
+	return NULL;
 }

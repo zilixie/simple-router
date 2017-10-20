@@ -231,6 +231,8 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
 			/* send arp request */
 			uint8_t* broadcast_packet = malloc(sizeof(struct sr_ethernet_hdr) + sizeof(struct sr_arp_hdr));
 			unsigned int new_pkt_len = sizeof(struct sr_ethernet_hdr) + sizeof(struct sr_arp_hdr);
+			
+			
 			struct sr_ethernet_hdr* new_ether_hdr = (struct sr_ethernet_hdr*)broadcast_packet;
 			struct sr_arp_hdr* new_arp_hdr = (struct sr_arp_hdr*)(broadcast_packet + sizeof(struct sr_ethernet_hdr));
 			memset(&new_ether_hdr->ether_dhost, 0xff, ETHER_ADDR_LEN);
@@ -389,15 +391,14 @@ int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst){
 	return 0;
 }
 	
-struct sr_rt* sr_get_rt_by_gateway(struct sr_instance* sr, uint32_t gateway) {
-	struct sr_rt *rt_walker = sr->routing_table;
+struct sr_rt* get_Node_From_RoutingTable(struct sr_instance* sr, uint32_t ip){
+	struct sr_rt *rt = sr->routing_table;
 
-	while(rt_walker) {
-		if (rt_walker->gw.s_addr == gateway) {
-			return rt_walker;
-		}
-	rt_walker = rt_walker->next;
-	}
-  	return 0;
+  while(rt) {
+    if (rt->gw.s_addr == ip) {
+      return rt;
+    }
+    rt = rt->next;
+  }
+return NULL;
 }
-

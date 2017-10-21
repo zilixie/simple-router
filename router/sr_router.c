@@ -136,7 +136,7 @@ void handle_arp(struct sr_instance *sr,
 		replace_arp_hardware_addrs(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);
 		reply_arp_hdr->ar_tip = arp_hdr->ar_sip;
 		reply_arp_hdr->ar_sip = interface_pt->ip;
-		replace_etnet_addrs(reply_etnet_hdr, interface_pt->addr, reply_etnet_hdr->ether_shost);
+		replace_etnet_addrs(reply_etnet_hdr, arp_hdr->ar_sha, reply_etnet_hdr->ether_shost);
 		reply_etnet_hdr->ether_type = htons(ethertype_arp);
 
 		print_hdrs(reply_pkt, len);

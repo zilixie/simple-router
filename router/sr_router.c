@@ -154,7 +154,7 @@ void handle_arp(struct sr_instance *sr,
 				struct sr_ethernet_hdr* current_etnet_hdr = (struct sr_ethernet_hdr*)(current_pkt->buf);
 				struct sr_if* current_interface_pt = sr_get_interface(sr, current_pkt->iface);
 
-				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha)
+				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha);
 
 				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);
 				current_pkt = (*current_pkt).next;
@@ -165,7 +165,7 @@ void handle_arp(struct sr_instance *sr,
 	}
 }
 
-void sr_handle_ip_packet(struct sr_instance* sr,
+void handle_ip(struct sr_instance* sr,
 				uint8_t * packet/* lent */,
 				unsigned int len,
 				char* interface/* lent */)

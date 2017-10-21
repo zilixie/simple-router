@@ -68,6 +68,8 @@ int sr_read_from_server(struct sr_instance* );
 void sr_init(struct sr_instance* );
 void sr_handlepacket(struct sr_instance* , uint8_t * , unsigned int , char* );
 void handle_arp(struct sr_instance* ,uint8_t *, unsigned int,char *);
+void replace_etnet_addrs(sr_ethernet_hdr_t *, uint8_t *, uint8_t *);
+void replace_arp_hardware_addrs(sr_arp_hdr_t *, unsigned char *, unsigned char *);
 
 
 /* -- sr_if.c -- */

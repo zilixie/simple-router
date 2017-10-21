@@ -170,6 +170,9 @@ void handle_ip(struct sr_instance* sr,
 				unsigned int len,
 				char* interface/* lent */)
 {
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+	int ip_hdr_size = sizeof(sr_ip_hdr_t);
+	
 	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
 
 	if (len < sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t)) {
@@ -193,7 +196,7 @@ void handle_ip(struct sr_instance* sr,
 		struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);
 
 		if (rt_entry != NULL) {
-			//outgoing interface
+			/*outgoing interface*/
 			struct sr_if *sender_interface_pt = sr_get_interface(sr, rt_entry->interface);
 
 			/* look up the cache to find arpentry*/
@@ -226,7 +229,7 @@ void handle_ip(struct sr_instance* sr,
 	} else {
 		printf("packet to the router\n");
 		if(ip_hdr->ip_p == htons(ip_protocol_icmp)){
-			sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (reply_pkt + etnet_hdr_size + ip_hdr_size);
+			sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (packet + etnet_hdr_size + ip_hdr_size);
 			if (icmp_hdr->icmp_type == (uint8_t) 8) {
 				send_icmp_t0_pkt(sr, packet, interface,len, 0, 0);
 			}

@@ -72,6 +72,7 @@ void replace_etnet_addrs(sr_ethernet_hdr_t *, uint8_t *, uint8_t *);
 void replace_arp_hardware_addrs(sr_arp_hdr_t *, unsigned char *, unsigned char *);
 void handle_ip(struct sr_instance*, uint8_t *, unsigned int, char*);
 int validate_ip_cksum (uint8_t *);
+struct sr_rt* rt_entry_lpm(struct sr_instance *, uint32_t);
 
 
 /* -- sr_if.c -- */

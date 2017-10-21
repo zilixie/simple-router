@@ -89,7 +89,7 @@ void sr_handlepacket(struct sr_instance* sr,
     
     	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
     		printf("receive ARP\n");
-    		//handle_arp(sr, packet_copy, len, interface);
+    		handle_arp(sr, packet, len, interface);
 		return;
     	}
     	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
@@ -109,8 +109,8 @@ void handle_arp(struct sr_instance *sr,
 	int ip_hdr_size = sizeof(sr_ip_hdr_t);
 
 	if (len < etnet_hdr_size + ip_hdr_size){
-		// Send ICMP Msg
-        	return -1;
+		/*Send ICMP Msg*/
+        	return;
 	}
 
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
@@ -118,7 +118,7 @@ void handle_arp(struct sr_instance *sr,
 	if (ntohs(arp_hdr->ar_op) == arp_op_request){
 		uint8_t *reply_pkt = (uint8_t *)malloc(ip_hdr_size + etnet_hdr_size);
 
-		//reply headers
+		/*reply headers*/
 		sr_ethernet_hdr_t *reply_etnet_hdr = (sr_ethernet_hdr_t *)reply_pkt;
 		sr_arp_hdr_t *reply_arp_hdr = (sr_arp_hdr_t *)(reply_pkt + etnet_hdr_size);
 

@@ -82,6 +82,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	print_hdrs(packet, len);
     
 	sr_ethernet_hdr_t *etnet_hdr;
+	etnet_hdr = (sr_ethernet_hdr_t *)packet;
 	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
     
 	if (len < etnet_hdr_size){
@@ -132,7 +133,7 @@ void handle_arp(struct sr_instance *sr,
     		reply_arp_hdr->ar_pln = arp_hdr->ar_pln;       
 		reply_arp_hdr->ar_op = htons(arp_op_reply);
 
-		replace_arp_hardware_adds(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);
+		replace_arp_hardware_addrs(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);
 		reply_arp_hdr->ar_tip = arp_hdr->ar_sip;
 		reply_arp_hdr->ar_sip = interface_pt->ip;
 		replace_etnet_addrs(reply_etnet_hdr, interface_pt->addr, reply_etnet_hdr->ether_shost);

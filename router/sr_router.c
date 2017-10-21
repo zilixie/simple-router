@@ -235,9 +235,6 @@ void handle_t3_icmp_pkt(struct sr_instance* sr,
 	int icmp_t3_size = sizeof(struct sr_icmp_t3_hdr);
 
 	/* received pkt*/
-	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
-	sr_ethernet_hdr_t *etnet_hdr = (sr_ethernet_hdr_t *)packet;
-
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
 	uint8_t *reply_pkt = (uint8_t *)malloc(icmp_t3_size + etnet_hdr_size + ip_hdr_size);
 	memcpy(reply_pkt, packet, etnet_hdr_size + ip_hdr_size);
@@ -268,7 +265,7 @@ void handle_t3_icmp_pkt(struct sr_instance* sr,
 
 	/*construct etnet hdr*/
 	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
-	memcpy(&(reply_etnet_hdr->ether_dhost), &(etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
+	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
 	reply_ethnet_hdr->ether_type = htons(ethertype_ip);
 	int total_pkt_size = icmp_t3_size + etnet_hdr_size + ip_hdr_size;
 

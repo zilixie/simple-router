@@ -71,31 +71,30 @@ void sr_handlepacket(struct sr_instance* sr,
         unsigned int len,
         char* interface/* lent */)
 {
-    /* REQUIRES */
-    assert(sr);
-    assert(packet);
-    assert(interface);
+	/* REQUIRES */
+	assert(sr);
+	assert(packet);
+	assert(interface);
 
-    printf("*** -> Received packet of length %d \n",len);
-    print_hdrs(packet, len);
+	printf("*** -> Received packet of length %d \n",len);
+	print_hdrs(packet, len);
     
-    sr_ethernet_hdr_t *etnet_hdr;
-    etnet_hdr = (sr_ethernet_hdr_t *)packet;
-    uint8_t *etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+	sr_ethernet_hdr_t *etnet_hdr;
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
     
-    if (len < etnet_hdr_size){
-	/* Send ICMP Msg */
-        return -1;
-    }
+	if (len < etnet_hdr_size){
+		/* Send ICMP Msg */
+        	return 0;
+    	}
     
-    if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
-    	printf("receive ARP\n");
-    	//handle_arp(sr, packet_copy, len, interface);
+    	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
+    		printf("receive ARP\n");
+    		//handle_arp(sr, packet_copy, len, interface);
 		return 0;
-    }
-    else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
-    	printf("receive IP\n");
-    }
+    	}
+    	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
+    		printf("receive IP\n");
+    	}
     /* fill in code here */
 
 }/* end sr_ForwardPacket */
@@ -106,13 +105,13 @@ void handle_arp(struct sr_instance *sr,
 		     unsigned int len,
 		     char *interface/* lent */)
 {
-	uint8_t *etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
-	uint8_t *ip_hdr_size = sizeof(sr_ip_hdr_t);
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+	int ip_hdr_size = sizeof(sr_ip_hdr_t);
 
 	if (len < etnet_hdr_size + ip_hdr_size){
-	// Send ICMP Msg
-        return -1;
-    }
+		// Send ICMP Msg
+        	return -1;
+	}
 
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
 
@@ -125,10 +124,10 @@ void handle_arp(struct sr_instance *sr,
 
 		struct sr_if *interface_pt = sr_get_interface(sr, interface);
 
-    	reply_arp_hdr->ar_hrd = arp_hdr->ar_hrd;
-    	reply_arp_hdr->ar_pro = arp_hdr->ar_pro;
-    	reply_arp_hdr->ar_hln = arp_hdr->ar_hln;
-    	reply_arp_hdr->ar_pln = arp_hdr->ar_pln;       
+		reply_arp_hdr->ar_hrd = arp_hdr->ar_hrd;
+		reply_arp_hdr->ar_pro = arp_hdr->ar_pro;
+    		reply_arp_hdr->ar_hln = arp_hdr->ar_hln;
+    		reply_arp_hdr->ar_pln = arp_hdr->ar_pln;       
 		reply_arp_hdr->ar_op = htons(arp_op_reply);
 
 		replace_arp_hardware_adds(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);

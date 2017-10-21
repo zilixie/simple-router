@@ -136,7 +136,7 @@ void handle_arp(struct sr_instance *sr,
 		replace_arp_hardware_addrs(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);
 		reply_arp_hdr->ar_tip = arp_hdr->ar_sip;
 		reply_arp_hdr->ar_sip = interface_pt->ip;
-		replace_etnet_addrs(reply_etnet_hdr, arp_hdr->ar_sha, reply_etnet_hdr->ether_shost);
+		replace_etnet_addrs(reply_etnet_hdr, interface_pt->addr, arp_hdr->ar_sha);
 		reply_etnet_hdr->ether_type = htons(ethertype_arp);
 
 		print_hdrs(reply_pkt, len);
@@ -145,8 +145,8 @@ void handle_arp(struct sr_instance *sr,
 }
 
 void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *dest) {
-	memcpy(etnet_hdr->ether_shost, src, ETHER_ADDR_LEN * sizeof(uint8_t));
-	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN * sizeof(uint8_t));
+	memcpy(etnet_hdr->ether_shost, src, ETHER_ADDR_LEN);
+	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN);
 }
 
 void replace_arp_hardware_addrs(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {

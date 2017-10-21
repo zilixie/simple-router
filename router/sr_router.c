@@ -222,6 +222,73 @@ void handle_ip(struct sr_instance* sr,
 }
 
 
+
+
+
+
+void handle_t3_icmp_pkt(struct sr_instance* sr, 
+				uint8_t *packet, 
+				char* interface,
+				unsigned int len, 
+				uint8_t icmp_type, 
+				uint8_t icmp_code){
+
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+	int ip_hdr_size = sizeof(sr_ip_hdr_t);
+
+	/* received pkt*/
+	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
+	sr_ethernet_hdr_t *etnet_hdr = (sr_ethernet_hdr_t *)packet;
+	sr_icmp_hdr_t *icmp_hdr = (sr_icmp_hdr_t *)((uint8_t *)ip_hdr + sizeof(sr_ip_hdr_t));
+
+	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
+	uint8_t *reply_pkt = malloc(sizeof(struct sr_icmp_t3_hdr) + sizeof(struct sr_ethernet_hdr) + sizeof(struct sr_ip_hdr));
+
+	sr_ethernet_hdr_t * reply_ethnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
+	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + sizeof(struct sr_ethernet_hdr));
+
+	ip_hdr->ip_tos = htons(0);
+	ip_hdr->ip_v = 0x4;
+	ip_hdr->ip_hl = 0x4;
+	ip_hdr->ip_len = htons(56);
+	ip_hdr->ip_id = htons(56);
+	ip_hdr->ip_ttl = 64;
+	ip_hdr->ip_off = htons(IP_DF);
+	ip_hdr->ip_p = ip_protocol_icmp;
+	ip_hdr->ip_src = sr_interface_pt->ip;
+	ip_hdr->ip_dst = ip_hdr->ip_src;
+	ip_hdr->ip_sum = 0x0;
+
+	sr_icmp_t3_hdr_t * t3_icmp_hdr = (sr_icmp_t3_hdr_t *) (reply_pkt + etnet_hdr_size + ip_hdr_size);
+
+	t3_icmp_hdr->icmp_type = type;
+	t3_icmp_hdr->unused = 0x0;
+	t3_icmp_hdr->next_mtu = 0;
+	t3_icmp_hdr->icmp_code = code;
+	memcpy(&(t3_icmp_hdr->data), ip_hdr_old, 8);
+	t3_icmp_hdr->icmp_sum = 0x0;
+
+	t3_icmp_hdr->icmp_sum = cksum(t3_icmp_hdr, sizeof(struct sr_icmp_t3_hdr));
+	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
+
+	memcpy(&(reply_ethnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
+	memcpy(&(reply_ethnet_hdr->ether_dhost), &(etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
+	reply_ethnet_hdr->ether_type = htons(ethertype_ip);
+
+	printf("SENDING TYPE 3 IN HANDLE ICMP\n");
+	print_hdr_ip(reply_pkt);
+	sr_send_packet(sr, reply_pkt, 70, interface);
+	free(reply_pkt);
+
+
+}
+
+
+
+
+
+
+
 void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *dest) {
 	memcpy(etnet_hdr->ether_shost, src, ETHER_ADDR_LEN);
 	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN);

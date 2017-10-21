@@ -117,7 +117,7 @@ void handle_arp(struct sr_instance *sr,
 	}
 
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
-
+	/*arp request*/
 	if (ntohs(arp_hdr->ar_op) == arp_op_request){
 		uint8_t *reply_pkt = (uint8_t *)malloc(ip_hdr_size + etnet_hdr_size);
 
@@ -129,8 +129,8 @@ void handle_arp(struct sr_instance *sr,
 
 		reply_arp_hdr->ar_hrd = arp_hdr->ar_hrd;
 		reply_arp_hdr->ar_pro = arp_hdr->ar_pro;
-    		reply_arp_hdr->ar_hln = arp_hdr->ar_hln;
-    		reply_arp_hdr->ar_pln = arp_hdr->ar_pln;       
+		reply_arp_hdr->ar_hln = arp_hdr->ar_hln;
+		reply_arp_hdr->ar_pln = arp_hdr->ar_pln;       
 		reply_arp_hdr->ar_op = htons(arp_op_reply);
 
 		replace_arp_hardware_addrs(reply_arp_hdr, interface_pt->addr, arp_hdr->ar_sha);
@@ -141,6 +141,27 @@ void handle_arp(struct sr_instance *sr,
 
 		print_hdrs(reply_pkt, len);
 		sr_send_packet(sr, reply_pkt, len, interface);
+	}
+	/*arp reply*/
+	if (ntohs(arp_hdr->ar_op) == arp_op_reply){
+		struct sr_arpreq * request = sr_arpcache_insert(&(sr->cache), arp_hdr->ar_sha, arp_hdr->ar_sip);
+		if (request != NULL) {
+			struct sr_packet * current_pkt = request->packets;
+			/*loop through all packet for this request*/
+			while (curr_pkt != NULL) {
+
+				/*create ethernet header*/
+				struct sr_ethernet_hdr* current_etnet_hdr = (struct sr_ethernet_hdr*)(current_pkt->buf);
+				struct sr_if* current_interface_pt = sr_get_interface(sr, current_pkt->iface);
+
+				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha)
+
+				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);
+				current_pkt = (*current_pkt).next
+			}
+			sr_arpreq_destroy(&(sr->cache), request);
+			return;
+		}
 	}
 }
 

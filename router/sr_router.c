@@ -148,7 +148,7 @@ void handle_arp(struct sr_instance *sr,
 		if (request != NULL) {
 			struct sr_packet * current_pkt = request->packets;
 			/*loop through all packet for this request*/
-			while (curr_pkt != NULL) {
+			while (current_pkt != NULL) {
 
 				/*create ethernet header*/
 				struct sr_ethernet_hdr* current_etnet_hdr = (struct sr_ethernet_hdr*)(current_pkt->buf);
@@ -157,7 +157,7 @@ void handle_arp(struct sr_instance *sr,
 				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha)
 
 				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);
-				current_pkt = (*current_pkt).next
+				current_pkt = (*current_pkt).next;
 			}
 			sr_arpreq_destroy(&(sr->cache), request);
 			return;
@@ -170,9 +170,9 @@ void sr_handle_ip_packet(struct sr_instance* sr,
 				unsigned int len,
 				char* interface/* lent */)
 {
-	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
 	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
 	int ip_hdr_size = sizeof(sr_ip_hdr_t);
+	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
 	
 	if (len < etnet_hdr_size + ip_hdr_size) {
 		printf("invalid datagram length\n");
@@ -185,7 +185,7 @@ void sr_handle_ip_packet(struct sr_instance* sr,
 	}
 	ip_hdr->ip_ttl--;
 
-	if(ip_header->ip_ttl == 0) {
+	if(ip_hdr->ip_ttl == 0) {
 		/*send icmp time exceeded*/
 		/*handle_icmp(sr, 11, 0, packet, len, interface); */
 	}
@@ -224,7 +224,7 @@ struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
     
     while(routing_table)
     {
-        if(longest_match = NULL || routing_table->mask.s_addr > curr_mask)
+        if(longest_match == NULL || routing_table->mask.s_addr > curr_mask)
         {
         	uint32_t mask = routing_table->mask.s_addr;
             if ((ip_dst & mask) == (routing_table->dest.s_addr & mask))

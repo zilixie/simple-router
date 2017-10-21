@@ -140,3 +140,13 @@ void handle_arp(struct sr_instance *sr,
 	}
 }
 
+void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *dest) {
+	memcpy(etnet_hdr->ether_shost, src, ETHER_ADDR_LEN * sizeof(uint8_t));
+	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN * sizeof(uint8_t));
+}
+
+void replace_arp_hardware_adds(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
+	memcpy(arp_header->ar_tha, new_tha, ETHER_ADDR_LEN);
+	memcpy(arp_header->ar_sha, new_sha, ETHER_ADDR_LEN);
+}
+

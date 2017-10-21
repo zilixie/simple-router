@@ -91,12 +91,12 @@ void sr_handlepacket(struct sr_instance* sr,
     	}
     
     	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
-    		printf("receive ARP\n");
+    		printf("Receive ARP \n\n");
     		handle_arp(sr, packet, len, interface);
 		return;
     	}
     	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
-    		printf("receive IP\n");
+    		printf("Receive IP \n\n");
     	}
     /* fill in code here */
 
@@ -165,6 +165,33 @@ void handle_arp(struct sr_instance *sr,
 	}
 }
 
+void sr_handle_ip_packet(struct sr_instance* sr,
+				uint8_t * packet/* lent */,
+				unsigned int len,
+				char* interface/* lent */)
+{
+	sr_ip_hdr_t* ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+	int ip_hdr_size = sizeof(sr_ip_hdr_t);
+	
+	if (len < etnet_hdr_size + ip_hdr_size) {
+		printf("invalid datagram length\n");
+		return;
+	}
+
+	if (!validate_ip_cksum(packet)) {
+		printf("invalid ip packet cksum\n");
+		return;	
+	}
+	ip_hdr->ip_ttl--;
+
+	if(ip_header->ip_ttl == 0) {
+		/*send icmp time exceeded*/
+		/*handle_icmp(sr, 11, 0, packet, len, interface); */
+	}
+}
+
+
 void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *dest) {
 	memcpy(etnet_hdr->ether_shost, src, ETHER_ADDR_LEN);
 	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN);
@@ -173,5 +200,18 @@ void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *de
 void replace_arp_hardware_addrs(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
 	memcpy(arp_header->ar_tha, new_tha, ETHER_ADDR_LEN);
 	memcpy(arp_header->ar_sha, new_sha, ETHER_ADDR_LEN);
+}
+
+
+int validate_ip_cksum (uint8_t * packet) {
+	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
+	uint16_t hdr_cksum = ip_header->ip_sum;
+	ip_header->ip_sum = (uint16_t) 0;
+	if (hdr_cksum != cksum(ip_header, ip_header->ip_len)) {
+		ip_header->ip_sum = hdr_cksum;
+		return 0;
+	}
+	ip_header->ip_sum = hdr_cksum;
+	return 1;
 }
 

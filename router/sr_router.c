@@ -84,13 +84,13 @@ void sr_handlepacket(struct sr_instance* sr,
     
 	if (len < etnet_hdr_size){
 		/* Send ICMP Msg */
-        	return 0;
+        	return;
     	}
     
     	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
     		printf("receive ARP\n");
     		//handle_arp(sr, packet_copy, len, interface);
-		return 0;
+		return;
     	}
     	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
     		printf("receive IP\n");

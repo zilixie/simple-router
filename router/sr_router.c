@@ -187,7 +187,37 @@ void handle_ip(struct sr_instance* sr,
 
 	if(ip_hdr->ip_ttl == 0) {
 		/*send icmp time exceeded*/
+		printf("no ttl remaining.\n");
 		/*handle_icmp(sr, 11, 0, packet, len, interface); */
+	}else {
+		/* router is not the receiver*/
+		if (ip_in_sr_interface_list(sr, ip_hdr->ip_dst)) {
+			struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);
+			if (rt_entry != NULL) {
+				//outgoing interface
+				struct sr_if *sender_interface_pt = sr_get_interface(sr, rt_entry->interface);
+
+				/* look up the cache to find arpentry*/
+				struct sr_arpentry *arp_entry = sr_arpcache_lookup(&sr->cache, rt_entry->gw.s_addr);
+
+				/*not found*/
+				if (arp_entry == NULL) {
+					/*add to the arp queue, and send a arp request*/
+					struct sr_arpreq * arp_req = sr_arpcache_queuereq(&sr->cache, ip_hdr->ip_dst, packet, len, out_if->name);
+					/*handle_arpreq(sr, arp_req);*/
+					return;
+				}
+				else if (arp_entry != NULL){
+
+					/*prepare for ethernet header*/
+					sr_ethernet_hdr_t * etnet_hdr;
+					etnet_hdr = (sr_ethernet_hdr_t *)packet;
+
+					replace_etnet_addrs(sender_interface_pt->addr, arp_entry->mac);
+					sr_send_packet(sr, packet, len, sender_interface_pt->name);
+				}
+			}
+		}
 	}
 }
 

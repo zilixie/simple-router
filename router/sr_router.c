@@ -215,3 +215,26 @@ int validate_ip_cksum (uint8_t * packet) {
 	return 1;
 }
 
+
+struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
+    struct sr_rt* routing_table = sr->routing_table;
+	struct sr_rt* longest_match = NULL;
+
+    uint32_t curr_mask = 0;
+    
+    while(routing_table)
+    {
+        if(longest_match = NULL || routing_table->mask.s_addr > curr_mask)
+        {
+        	uint32_t mask = routing_table->mask.s_addr;
+            if ((ip_dst & mask) == (routing_table->dest.s_addr & mask))
+            {
+            	longest_match = routing_table;
+                curr_mask = routing_table->mask.s_addr;
+            } 
+        }
+        routing_table = routing_table->next;
+    }
+    return longest_match;
+}
+

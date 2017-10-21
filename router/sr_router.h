@@ -70,6 +70,8 @@ void sr_handlepacket(struct sr_instance* , uint8_t * , unsigned int , char* );
 void handle_arp(struct sr_instance* ,uint8_t *, unsigned int,char *);
 void replace_etnet_addrs(sr_ethernet_hdr_t *, uint8_t *, uint8_t *);
 void replace_arp_hardware_addrs(sr_arp_hdr_t *, unsigned char *, unsigned char *);
+void handle_ip(struct sr_instance*, uint8_t *, unsigned int, char*);
+int validate_ip_cksum (uint8_t *);
 
 
 /* -- sr_if.c -- */

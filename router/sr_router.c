@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 #include "sr_if.h"
@@ -145,7 +147,7 @@ void replace_etnet_addrs(sr_ethernet_hdr_t *etnet_hdr, uint8_t *src, uint8_t *de
 	memcpy(etnet_hdr->ether_dhost, dest, ETHER_ADDR_LEN * sizeof(uint8_t));
 }
 
-void replace_arp_hardware_adds(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
+void replace_arp_hardware_addrs(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
 	memcpy(arp_header->ar_tha, new_tha, ETHER_ADDR_LEN);
 	memcpy(arp_header->ar_sha, new_sha, ETHER_ADDR_LEN);
 }

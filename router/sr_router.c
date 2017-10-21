@@ -238,3 +238,19 @@ struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
     return longest_match;
 }
 
+
+int ip_in_sr_interface_list(struct sr_instance* sr, uint32_t ip_dst){
+	struct sr_if* interface_pt = sr->if_list;
+
+	while(interface_pt){
+		if (interface_pt->ip == ip_dst) {
+			return 1;		
+		}
+		else{
+			interface_pt = interface_pt->next;
+		}
+	}
+	return 0;
+}
+
+

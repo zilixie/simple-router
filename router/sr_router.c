@@ -266,7 +266,7 @@ void handle_t3_icmp_pkt(struct sr_instance* sr,
 	/*construct etnet hdr*/
 	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
 	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
-	reply_ethnet_hdr->ether_type = htons(ethertype_ip);
+	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 	int total_pkt_size = icmp_t3_size + etnet_hdr_size + ip_hdr_size;
 
 	printf("\n\nsending t3 icmp\n\n");

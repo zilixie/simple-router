@@ -137,7 +137,7 @@ void handle_arp(struct sr_instance *sr,
 		reply_arp_hdr->ar_tip = arp_hdr->ar_sip;
 		reply_arp_hdr->ar_sip = interface_pt->ip;
 		replace_etnet_addrs(reply_etnet_hdr, interface_pt->addr, reply_etnet_hdr->ether_shost);
-		reply_etnet_hdr->ether_type = hton(ethertype_arp);
+		reply_etnet_hdr->ether_type = htons(ethertype_arp);
 
 		print_hdrs(reply_pkt, len);
 		sr_send_packet(sr, reply_pkt, len, interface);

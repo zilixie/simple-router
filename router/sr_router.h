@@ -73,6 +73,7 @@ void replace_arp_hardware_addrs(sr_arp_hdr_t *, unsigned char *, unsigned char *
 void handle_ip(struct sr_instance*, uint8_t *, unsigned int, char*);
 int validate_ip_cksum (uint8_t *);
 struct sr_rt* rt_entry_lpm(struct sr_instance *, uint32_t);
+int ip_in_sr_interface_list(struct sr_instance*, uint32_t);
 
 
 /* -- sr_if.c -- */

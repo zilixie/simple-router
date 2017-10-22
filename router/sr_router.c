@@ -79,7 +79,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	assert(interface);
 
 	printf("*** -> Received packet of length %d \n",len);
-	print_hdrs(packet, len);
     
 	sr_ethernet_hdr_t *etnet_hdr;
 	etnet_hdr = (sr_ethernet_hdr_t *)packet;
@@ -91,12 +90,16 @@ void sr_handlepacket(struct sr_instance* sr,
     	}
     
     	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
-    		printf("Receive ARP @@@@@@@ \n\n");
+    		printf("Receive ARP \n\n");
+		print_hdrs(packet, len);
+		printf("\n\n");
     		handle_arp(sr, packet, len, interface);
 		return;
     	}
     	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
     		printf("Receive IP \n\n");
+		print_hdrs(packet, len);
+		printf("\n\n");
 		handle_ip(sr, packet, len, interface);
 		return;
     	}
@@ -140,8 +143,10 @@ void handle_arp(struct sr_instance *sr,
 		reply_arp_hdr->ar_sip = interface_pt->ip;
 		replace_etnet_addrs(reply_etnet_hdr, interface_pt->addr, arp_hdr->ar_sha);
 		reply_etnet_hdr->ether_type = htons(ethertype_arp);
-
+		
+		printf("Router send ARP reply\n\n");
 		print_hdrs(reply_pkt, len);
+		
 		sr_send_packet(sr, reply_pkt, len, interface);
 		free(reply_pkt);
 		return;
@@ -159,6 +164,8 @@ void handle_arp(struct sr_instance *sr,
 				struct sr_if* current_interface_pt = sr_get_interface(sr, current_pkt->iface);
 
 				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha);
+				
+				printf("Router send Packets waiting in queue\n\n");
 				print_hdrs(current_pkt->buf, current_pkt->len);
 				printf("\n\n %s \n\n\n", current_pkt->iface);
 				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);

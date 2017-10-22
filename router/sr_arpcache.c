@@ -18,65 +18,73 @@
 */
 
 void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
-    struct sr_packet * packet = (struct sr_packet*)malloc(sizeof(struct sr_packet));
-    packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
-    packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);
-    sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;
-    sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));
 
-    struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);
-    packet->iface = interface_to_send_on->name;
-    arp_header->ar_hrd = htons(arp_hrd_ethernet);
-    arp_header->ar_pro = htons(0x800);
-    arp_header->ar_hln = ETHER_ADDR_LEN;
-    arp_header->ar_pln = 4;
-    arp_header->ar_op = htons(arp_op_request);
-    arp_header->ar_tip = req->ip;
-    arp_header->ar_sip = interface_to_send_on->ip;
-    /* Reconfigure ARP src/dest targets */
+	struct sr_if *dst_interface = sr_get_interface(sr, req->packets->iface);
+	void * pkt = (uint8_t *)malloc(arp_hdr_size + etnet_hdr_siz);
+	sr_ethernet_hdr_t * etnet_hdr = (sr_ethernet_hdr_t *)pkt;
+	sr_arp_hdr_t * arp_hdr = (sr_arp_hdr_t *)(pkt + sizeof(sr_ethernet_hdr_t));	
+	
+	
+	
+    //packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+    //packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);
+    //sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;
+    //sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));
+
+    //struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);
+
+	
+    	arp_hdr->ar_op = htons(arp_op_request);
+    	arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
+    	arp_hdr->ar_pro = htons(ethertype_ip);
+    	arp_hdr->ar_hln = ETHER_ADDR_LEN;
+    	arp_hdr->ar_pln = sizeof(uint32_t);
+    	arp_hdr->ar_tip = req->ip;
+    	arp_hdr->ar_sip = interface_to_send_on->ip;
+    	/* Reconfigure ARP src/dest targets */
     
-    uint8_t all_one[6] = {-1, -1, -1, -1, -1, -1};
+	uint8_t broadcast_addr[ETHER_ADDR_LEN]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+    	replace_arp_hardware_addrs(arp_header, interface_to_send_on->addr, broadcast_addr);
 
-    replace_arp_hardware_addrs(arp_header, interface_to_send_on->addr, all_one);
-    replace_etnet_addrs(ethernet_header, interface_to_send_on->addr, all_one);
-
-    ethernet_header->ether_type = htons(ethertype_arp);
-    sr_send_packet(sr, packet->buf, packet->len, packet->iface);
-    free(packet->buf);
-    free(packet);
+    	/* Set Ethernet dest/src addrs */
+    	replace_etnet_addrs(ethernet_header, interface_to_send_on->addr, broadcast_addr);
+   	ethernet_header->ether_type = htons(ethertype_arp);
+    	sr_send_packet(sr, packet->buf, packet->len, packet->iface);
+    	free(packet->buf);
 }
 
 
+
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
-    struct sr_arpcache *cache = &(sr->cache);
-    /*struct sr_if *currIface;*/
-    time_t current_time = time(0);
-    time_t last_sent = arp_req->sent;
-    uint32_t tiems_sent = arp_req->times_sent;
-    struct sr_packet *pkt_pt;
-    
-    if (difftime(current_time, last_sent) > 1.0) {
-        if (tiems_sent >= 5) {
-            pkt_pt = arp_req->packets;          
-            while (pkt_pt) {
-                /* Send type 3 code 1 ICMP (Host Unreachable) */
-                send_icmp_t3_pkt(sr, pkt_pt->buf, pkt_pt->iface, pkt_pt->len, 3, 1);
-                pkt_pt = pkt_pt->next;
-            }
-            /* Destroy the request afterwards */
-            sr_arpreq_destroy(cache, arp_req);
+    	struct sr_arpcache *cache = &(sr->cache);
+    	/*struct sr_if *currIface;*/
+    	time_t current_time = time(0);
+    	time_t last_sent = arp_req->sent;
+    	uint32_t tiems_sent = arp_req->times_sent;
+    	struct sr_packet *pkt_pt;
+	
+	int arp_hdr_size = sizeof(sr_arp_hdr_t);
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+
+    	if (difftime(current_time, last_sent) > 1.0) {
+        	if (tiems_sent >= 5) {
+            		pkt_pt = arp_req->packets;          
+           		 while (pkt_pt) {
+                		/* Send type 3 code 1 ICMP (Host Unreachable) */
+                		send_icmp_t3_pkt(sr, pkt_pt->buf, pkt_pt->iface, pkt_pt->len, 3, 1);
+                		pkt_pt = pkt_pt->next;
+            		}
+            		/* destroy the request */
+            		sr_arpreq_destroy(cache, arp_req);
             
-        } else {
-            /* send arp request */
-
-
-            send_arp_req(sr, arp_req);
-            current_time = time(NULL);
-            arp_req->sent = current_time;
-            arp_req->times_sent++;
-
-        }
-    }
+        	} else {
+            		/*open an arp request */
+			open_arp_req(sr, req);
+            		arp_req->sent = current_time;
+            		arp_req->times_sent++;
+			
+        	}
+    	}
 }
 
 
@@ -87,7 +95,7 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
     struct sr_arpreq *req_cp;
 
     while(req) {
-        req_cp = req;
+	req_cp = req;
         req = req->next;
         handle_arpreq(sr, req_cp);
     }

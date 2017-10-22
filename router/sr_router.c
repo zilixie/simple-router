@@ -508,7 +508,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
-	printf("\n\nsending icmp\n\n");
+	printf("\n\nsending t3 icmp\n\n");
 	print_hdr_ip(reply_pkt);
 	sr_send_packet(sr, reply_pkt, len, interface);
 	free(reply_pkt);

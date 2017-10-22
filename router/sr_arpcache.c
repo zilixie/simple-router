@@ -22,7 +22,7 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
 
 	struct sr_if *dst_interface = sr_get_interface(sr, req->packets->iface);
-	void * pkt = (uint8_t *)malloc(arp_hdr_size + etnet_hdr_size);
+	uint8_t * pkt = (uint8_t *)malloc(arp_hdr_size + etnet_hdr_size);
 	sr_ethernet_hdr_t * etnet_hdr = (sr_ethernet_hdr_t *)pkt;
 	sr_arp_hdr_t * arp_hdr = (sr_arp_hdr_t *)(pkt + sizeof(sr_ethernet_hdr_t));	
 	
@@ -51,8 +51,8 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     	/* Set Ethernet dest/src addrs */
     	replace_etnet_addrs(etnet_hdr, dst_interface->addr, broadcast_addr);
    	etnet_hdr->ether_type = htons(ethertype_arp);
-    	sr_send_packet(sr, pkt->buf, packet->len, pkt->iface);
-    	free(pkt->buf);
+    	sr_send_packet(sr, pkt, arp_hdr_size + etnet_hdr_size, dst_interface);
+    	free(pkt);
 }
 
 

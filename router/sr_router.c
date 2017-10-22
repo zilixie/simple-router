@@ -465,7 +465,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	int t3_icmp_size = sizeof(sr_icmp_t3_hdr_t);
 
 	/* received pkt*/
-	/*sr_ethernet_hdr_t * received_etnet_hdr = (sr_ethernet_hdr_t *) packet;*/
+	sr_ethernet_hdr_t * received_etnet_hdr = (sr_ethernet_hdr_t *) packet;
 	sr_ip_hdr_t * received_ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
 
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);

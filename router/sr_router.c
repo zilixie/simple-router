@@ -431,7 +431,7 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	ip_hdr->ip_sum = 0;
 
 	ip_hdr->ip_src = received_ip_hdr->ip_dst;
-	ip_hdr->ip_dst = ip_hdr->ip_src;
+	ip_hdr->ip_dst = received_ip_hdr->ip_src;
 
 	ip_hdr->ip_id = 0;
 	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);

@@ -217,7 +217,7 @@ void handle_ip(struct sr_instance* sr,
 				sr_ethernet_hdr_t * etnet_hdr;
 				etnet_hdr = (sr_ethernet_hdr_t *)packet;
 
-				replace_etnet_addrs(sender_interface_pt->addr, arp_entry->mac);
+				replace_etnet_addrs(etnet_hdr, sender_interface_pt->addr, arp_entry->mac);
 				sr_send_packet(sr, packet, len, sender_interface_pt->name);
 				return;
 			}

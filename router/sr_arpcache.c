@@ -17,37 +17,6 @@
   See the comments in the header file for an idea of what it should look like.
 */
 
-void set_ethernet_src_dst(sr_ethernet_hdr_t * ethernet_header, uint8_t * new_src, uint8_t * new_dst) {
-	/* Swap Ethernet dest/src addrs */
-	memcpy(
-		ethernet_header->ether_dhost,
-		new_dst,
-		sizeof(uint8_t)*ETHER_ADDR_LEN
-	);
-
-	memcpy(
-		ethernet_header->ether_shost,
-		new_src,
-		sizeof(uint8_t)*ETHER_ADDR_LEN
-	);
-}
-
-void set_arp_sha_tha(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
-	/* Reconfigure ARP src/dest targets */
-	memcpy(
-		arp_header->ar_tha,
-		new_tha,
-		sizeof(unsigned char)*ETHER_ADDR_LEN
-	);
-
-	memcpy(
-		arp_header->ar_sha,
-		new_sha,
-		sizeof(unsigned char)*ETHER_ADDR_LEN
-	);
-}
-
-
 void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     struct sr_packet * packet = (struct sr_packet*)malloc(sizeof(struct sr_packet));
     packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
@@ -68,10 +37,8 @@ void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     
     uint8_t all_one[6] = {-1, -1, -1, -1, -1, -1};
 
-    set_arp_sha_tha(arp_header, interface_to_send_on->addr, all_one);
-
-    /* Set Ethernet dest/src addrs */
-    set_ethernet_src_dst(ethernet_header, interface_to_send_on->addr, all_one);
+    replace_arp_hardware_addrs(arp_header, interface_to_send_on->addr, all_one);
+    replace_etnet_addrs(ethernet_header, interface_to_send_on->addr, all_one);
 
     ethernet_header->ether_type = htons(ethertype_arp);
     sr_send_packet(sr, packet->buf, packet->len, packet->iface);

@@ -17,7 +17,35 @@
   See the comments in the header file for an idea of what it should look like.
 */
 
+void set_ethernet_src_dst(sr_ethernet_hdr_t * ethernet_header, uint8_t * new_src, uint8_t * new_dst) {
+	/* Swap Ethernet dest/src addrs */
+	memcpy(
+		ethernet_header->ether_dhost,
+		new_dst,
+		sizeof(uint8_t)*ETHER_ADDR_LEN
+	);
 
+	memcpy(
+		ethernet_header->ether_shost,
+		new_src,
+		sizeof(uint8_t)*ETHER_ADDR_LEN
+	);
+}
+
+void set_arp_sha_tha(sr_arp_hdr_t * arp_header, unsigned char * new_sha, unsigned char * new_tha) {
+	/* Reconfigure ARP src/dest targets */
+	memcpy(
+		arp_header->ar_tha,
+		new_tha,
+		sizeof(unsigned char)*ETHER_ADDR_LEN
+	);
+
+	memcpy(
+		arp_header->ar_sha,
+		new_sha,
+		sizeof(unsigned char)*ETHER_ADDR_LEN
+	);
+}
 
 
 void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {

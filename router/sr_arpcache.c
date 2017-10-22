@@ -78,12 +78,11 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
             		sr_arpreq_destroy(cache, arp_req);
             
         	} else {
-            		/*open an arp request */
+            		/* open an arp request */
 			open_arp_req(sr, arp_req);
-            		arp_req->sent = current_time;
-            		arp_req->times_sent++;
-			
         	}
+	        arp_req->sent = current_time;
+            	arp_req->times_sent++;
     	}
 }
 

@@ -358,7 +358,7 @@ void send_icmp_t11_pkt(struct sr_instance* sr,
 	/*construct etnet hdr*/
 	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
 	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
-	reply_ethnet_hdr->ether_type = htons(ethertype_ip);
+	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	int total_pkt_size = icmp_t11_size + etnet_hdr_size + ip_hdr_size;
 	printf("\n\nsending t11 icmp\n\n");
@@ -452,7 +452,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);
-	sr_icmp_t3_hdr_t * icmp_hdr_t3 = (sr_icmp_hdr_t *) (reply_pkt + etnet_hdr_size + ip_hdr_size);
+	sr_icmp_t3_hdr_t * icmp_hdr_t3 = (sr_icmp_t3_hdr_t *) (reply_pkt + etnet_hdr_size + ip_hdr_size);
 
 	/*construct icmp hdr*/
 	icmp_hdr_t3->icmp_type = (uint8_t) type;
@@ -485,7 +485,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	/*construct etnet hdr*/
 	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
 	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
-	reply_ethnet_hdr->ether_type = htons(ethertype_ip);
+	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	printf("\n\nsending icmp\n\n");
 	print_hdr_ip(reply_pkt);

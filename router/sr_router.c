@@ -91,7 +91,7 @@ void sr_handlepacket(struct sr_instance* sr,
     	}
     
     	if (ntohs((*etnet_hdr).ether_type) == ethertype_arp) {
-    		printf("Receive ARP \n\n");
+    		printf("Receive ARP @@@@@@@ \n\n");
     		handle_arp(sr, packet, len, interface);
 		return;
     	}
@@ -157,7 +157,7 @@ void handle_arp(struct sr_instance *sr,
 				struct sr_if* current_interface_pt = sr_get_interface(sr, current_pkt->iface);
 
 				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha);
-
+				print_hdrs(current_pkt->buf, current_pkt->len);
 				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);
 				current_pkt = (*current_pkt).next;
 			}

@@ -223,7 +223,7 @@ void handle_ip(struct sr_instance* sr,
 			}
 		}
 		else {
-			send_icmp_t3_pkt(sr,packet, interface, len, 3, 3);
+			send_icmp_t3_pkt(sr,packet, interface, len, 3, 0);
 			return;
 		}
 

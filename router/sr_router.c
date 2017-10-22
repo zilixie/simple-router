@@ -433,6 +433,7 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 void send_icmp_t3_pkt(struct sr_instance* sr, 
 				uint8_t *packet, 
 				char* interface,
+		      		unsigned int len,
 				int type, 
 				int code){
 

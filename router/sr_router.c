@@ -195,6 +195,8 @@ void handle_ip(struct sr_instance* sr,
 		if (ip_hdr->ip_ttl == 0) {
 			send_icmp_t11_pkt(sr, packet, interface, len);
 		}
+		ip_hdr->ip_sum = 0x0;
+		ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
 
 		struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);
 

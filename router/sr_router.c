@@ -262,7 +262,7 @@ int validate_ip_cksum (uint8_t * packet) {
 	printf("%d \n",hdr_cksum);
 	ip_header->ip_sum = (uint16_t) 0;
 	if (hdr_cksum != cksum(ip_header, ip_header->ip_len)) {
-		printf("%d \n",cksum(ip_header, ip_header->ip_len));
+		printf("%d \n",cksum(ip_header, sizeof(sr_ip_hdr_t);
 		ip_header->ip_sum = hdr_cksum;
 		return 0;
 	}

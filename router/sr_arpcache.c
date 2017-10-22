@@ -17,7 +17,9 @@
   See the comments in the header file for an idea of what it should look like.
 */
 
-void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
+void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
+	int arp_hdr_size = sizeof(sr_arp_hdr_t);
+	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
 
 	struct sr_if *dst_interface = sr_get_interface(sr, req->packets->iface);
 	void * pkt = (uint8_t *)malloc(arp_hdr_size + etnet_hdr_siz);
@@ -26,12 +28,12 @@ void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 	
 	
 	
-    //packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
-    //packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);
-    //sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;
-    //sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));
+    /*packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
+    /*packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);*/
+    /*sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;*/
+    /*sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));*/
 
-    //struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);
+    /*struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);*/
 
 	
     	arp_hdr->ar_op = htons(arp_op_request);
@@ -40,17 +42,17 @@ void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     	arp_hdr->ar_hln = ETHER_ADDR_LEN;
     	arp_hdr->ar_pln = sizeof(uint32_t);
     	arp_hdr->ar_tip = req->ip;
-    	arp_hdr->ar_sip = interface_to_send_on->ip;
+    	arp_hdr->ar_sip = dst_interface->ip;
     	/* Reconfigure ARP src/dest targets */
     
 	uint8_t broadcast_addr[ETHER_ADDR_LEN]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-    	replace_arp_hardware_addrs(arp_header, interface_to_send_on->addr, broadcast_addr);
+    	replace_arp_hardware_addrs(arp_header, dst_interface->addr, broadcast_addr);
 
     	/* Set Ethernet dest/src addrs */
-    	replace_etnet_addrs(ethernet_header, interface_to_send_on->addr, broadcast_addr);
+    	replace_etnet_addrs(ethernet_header, dst_interface->addr, broadcast_addr);
    	ethernet_header->ether_type = htons(ethertype_arp);
-    	sr_send_packet(sr, packet->buf, packet->len, packet->iface);
-    	free(packet->buf);
+    	sr_send_packet(sr, pkt->buf, packet->len, pkt->iface);
+    	free(pkt->buf);
 }
 
 
@@ -62,9 +64,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
     	time_t last_sent = arp_req->sent;
     	uint32_t tiems_sent = arp_req->times_sent;
     	struct sr_packet *pkt_pt;
-	
-	int arp_hdr_size = sizeof(sr_arp_hdr_t);
-	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
+
 
     	if (difftime(current_time, last_sent) > 1.0) {
         	if (tiems_sent >= 5) {
@@ -79,7 +79,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
             
         	} else {
             		/*open an arp request */
-			open_arp_req(sr, req);
+			open_arp_req(sr, arp_req);
             		arp_req->sent = current_time;
             		arp_req->times_sent++;
 			

@@ -143,6 +143,8 @@ void handle_arp(struct sr_instance *sr,
 
 		print_hdrs(reply_pkt, len);
 		sr_send_packet(sr, reply_pkt, len, interface);
+		free(reply_pkt);
+		return;
 	}
 	/*arp reply*/
 	if (ntohs(arp_hdr->ar_op) == arp_op_reply){

@@ -223,7 +223,7 @@ void handle_ip(struct sr_instance* sr,
 			}
 		}
 		else {
-			send_icmp_t3_pkt(sr,packet, interface, len, 3, 0);
+			send_icmp_t3_pkt(sr,packet, interface, 3, 0);
 			return;
 		}
 
@@ -236,7 +236,7 @@ void handle_ip(struct sr_instance* sr,
 			}
 
 		}else{
-			send_icmp_t3_pkt(sr,packet, interface, len, 3, 3); 
+			send_icmp_t3_pkt(sr,packet, interface, 3, 3); 
 		}
 		return;
 	}
@@ -433,7 +433,6 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 void send_icmp_t3_pkt(struct sr_instance* sr, 
 				uint8_t *packet, 
 				char* interface,
-				unsigned int len,
 				int type, 
 				int code){
 

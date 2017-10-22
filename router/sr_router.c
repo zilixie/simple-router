@@ -257,12 +257,11 @@ void replace_arp_hardware_addrs(sr_arp_hdr_t * arp_header, unsigned char * new_s
 
 
 int validate_ip_cksum (uint8_t * packet) {
+	int ip_hdr_size = sizeof(sr_ip_hdr_t);
 	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	uint16_t hdr_cksum = ip_header->ip_sum;
-	printf("%d \n",hdr_cksum);
 	ip_header->ip_sum = (uint16_t) 0;
-	if (hdr_cksum != cksum(ip_header, ip_header->ip_len)) {
-		printf("%d \n",cksum(ip_header, sizeof(sr_ip_hdr_t)));
+	if (hdr_cksum != cksum(ip_header, ip_hdr_size)) {
 		ip_header->ip_sum = hdr_cksum;
 		return 0;
 	}
@@ -272,25 +271,25 @@ int validate_ip_cksum (uint8_t * packet) {
 
 
 struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
-    struct sr_rt* routing_table = sr->routing_table;
+    	struct sr_rt* routing_table = sr->routing_table;
 	struct sr_rt* longest_match = NULL;
 
-    uint32_t curr_mask = 0;
+    	uint32_t curr_mask = 0;
     
-    while(routing_table)
-    {
-        if(longest_match == NULL || routing_table->mask.s_addr > curr_mask)
-        {
-        	uint32_t mask = routing_table->mask.s_addr;
-            if ((ip_dst & mask) == (routing_table->dest.s_addr & mask))
-            {
-            	longest_match = routing_table;
-                curr_mask = routing_table->mask.s_addr;
-            } 
-        }
-        routing_table = routing_table->next;
-    }
-    return longest_match;
+    	while(routing_table)
+    	{
+        	if(longest_match == NULL || routing_table->mask.s_addr > curr_mask)
+        	{
+        		uint32_t mask = routing_table->mask.s_addr;
+            		if ((ip_dst & mask) == (routing_table->dest.s_addr & mask))
+            		{
+            			longest_match = routing_table;
+                		curr_mask = routing_table->mask.s_addr;
+            		} 
+        	}
+        	routing_table = routing_table->next;
+    	}
+    	return longest_match;
 }
 
 

@@ -259,8 +259,10 @@ void replace_arp_hardware_addrs(sr_arp_hdr_t * arp_header, unsigned char * new_s
 int validate_ip_cksum (uint8_t * packet) {
 	sr_ip_hdr_t * ip_header = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	uint16_t hdr_cksum = ip_header->ip_sum;
+	printf(hdr_cksum);
 	ip_header->ip_sum = (uint16_t) 0;
 	if (hdr_cksum != cksum(ip_header, ip_header->ip_len)) {
+		printf(cksum(ip_header, ip_header->ip_len));
 		ip_header->ip_sum = hdr_cksum;
 		return 0;
 	}

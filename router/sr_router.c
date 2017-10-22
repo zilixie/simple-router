@@ -431,8 +431,8 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
 
 	/*construct etnet hdr*/
-	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
-	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_shost, sr_interface_pt->addr, ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_dhost, reply_etnet_hdr->ether_shost, ETHER_ADDR_LEN); 
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	printf("\n\nsending icmp\n\n");

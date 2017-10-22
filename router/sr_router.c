@@ -251,6 +251,8 @@ void handle_ip(struct sr_instance* sr,
 			}
 
 		}else{
+			printf("%d\n", ip_hdr->ip_p == ip_protocol_icmp);
+			printf("Router receives TCP UDP...\n");
 			send_icmp_t3_pkt(sr,packet, interface, len, 3, 3); 
 		}
 		return;
@@ -470,6 +472,12 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	uint8_t *reply_pkt = (uint8_t *)malloc(t3_icmp_size + etnet_hdr_size + ip_hdr_size);
 
 	memcpy(reply_pkt, packet, len);
+	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
+	print_hdrs(packet, len);
+	print_hdrs(reply_pkt, len);
+	
+	
+	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
 
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);
@@ -486,30 +494,30 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 
 
 	/*construct ip hdr*/
-
+	/*
 	ip_hdr->ip_hl = received_ip_hdr->ip_hl;
 	ip_hdr->ip_v = received_ip_hdr->ip_v;
 	ip_hdr->ip_tos = received_ip_hdr->ip_tos;
-	ip_hdr->ip_off = received_ip_hdr->ip_off;
+	ip_hdr->ip_off = received_ip_hdr->ip_off;*/
+	
 	ip_hdr->ip_ttl = INIT_TTL;
 	ip_hdr->ip_p = ip_protocol_icmp;
-	ip_hdr->ip_sum = 0x0;
+	ip_hdr->ip_sum = 0;
 
-	ip_hdr->ip_src = sr_interface_pt->ip;
-	ip_hdr->ip_dst = ip_hdr->ip_src;
+	ip_hdr->ip_src = received_ip_hdr->ip_dst;
+	ip_hdr->ip_dst = received_ip_hdr->ip_src;
 	ip_hdr->ip_len = ip_hdr_size + t3_icmp_size;
 	ip_hdr->ip_id = 0;
-	ip_hdr->ip_tos = 0;
 	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
 
 
 	/*construct etnet hdr*/
-	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
-	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_shost, sr_interface_pt->addr, ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_dhost, received_etnet_hdr->ether_shost, ETHER_ADDR_LEN); 
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	printf("\n\nsending t3 icmp\n\n");
-	print_hdr_ip(reply_pkt);
+	print_hdrs(reply_pkt, len);
 	sr_send_packet(sr, reply_pkt, len, interface);
 	free(reply_pkt);
 

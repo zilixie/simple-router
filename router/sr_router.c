@@ -445,7 +445,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	sr_ip_hdr_t * received_ip_hdr = (sr_ip_hdr_t *)(packet + etnet_hdr_size);
 
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
-	uint8_t *reply_pkt = (uint8_t *)malloc(len);
+	uint8_t *reply_pkt = (uint8_t *)malloc(t3_icmp_size + etnet_hdr_size + ip_hdr_size);
 
 	memcpy(reply_pkt, packet, len);
 

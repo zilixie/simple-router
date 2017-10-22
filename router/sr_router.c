@@ -190,7 +190,7 @@ void handle_ip(struct sr_instance* sr,
 
 		ip_hdr->ip_ttl--;
 		if (ip_hdr->ip_ttl == 0) {
-			handle_icmp_t11_pkt();
+			send_icmp_t11_pkt();
 		}
 
 		struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);

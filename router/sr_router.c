@@ -436,7 +436,7 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	printf("\n\nsending icmp\n\n");
-	print_hdrs(reply_pkt);
+	print_hdrs(reply_pkt, len);
 	sr_send_packet(sr, reply_pkt, len, interface);
 	free(reply_pkt);
 

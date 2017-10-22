@@ -480,16 +480,16 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	icmp_hdr_t3->icmp_sum = 0;
 	icmp_hdr_t3->icmp_code = (uint8_t) code;
 	icmp_hdr_t3->next_mtu = 0;
-	memcpy(icmp_hdr_t3->data, ip_hdr, ICMP_DATA_SIZE);/**/
+	memcpy(icmp_hdr_t3->data, received_ip_hdr, ICMP_DATA_SIZE);/**/
 	icmp_hdr_t3->icmp_sum = cksum(icmp_hdr_t3, t3_icmp_size);
 
 
 	/*construct ip hdr*/
-	/*
+
 	ip_hdr->ip_hl = received_ip_hdr->ip_hl;
 	ip_hdr->ip_v = received_ip_hdr->ip_v;
 	ip_hdr->ip_tos = received_ip_hdr->ip_tos;
-	ip_hdr->ip_off = received_ip_hdr->ip_off;*/
+	ip_hdr->ip_off = received_ip_hdr->ip_off;
 	
 	ip_hdr->ip_ttl = INIT_TTL;
 	ip_hdr->ip_p = ip_protocol_icmp;
@@ -501,7 +501,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	
 	
 	ip_hdr->ip_dst = received_ip_hdr->ip_src;
-	ip_hdr->ip_len = ip_hdr_size + t3_icmp_size;
+	ip_hdr->ip_len = htons(ip_hdr_size + t3_icmp_size);
 	ip_hdr->ip_id = 0;
 	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
 

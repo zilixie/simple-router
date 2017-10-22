@@ -76,7 +76,7 @@ struct sr_rt* rt_entry_lpm(struct sr_instance *, uint32_t);
 int ip_in_sr_interface_list(struct sr_instance*, uint32_t);
 void send_icmp_t11_pkt(struct sr_instance*, uint8_t *, char*, unsigned int);
 void send_icmp_t0_pkt(struct sr_instance*, uint8_t *, char*, unsigned int, int, int);
-void send_icmp_t3_pkt(struct sr_instance*, uint8_t *, char*, int, int);
+void send_icmp_t3_pkt(struct sr_instance*, uint8_t *, char*, unsigned int, int, int);
 
 /* -- sr_if.c -- */
 void sr_add_interface(struct sr_instance* , const char* );

@@ -401,6 +401,12 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	uint8_t *reply_pkt = (uint8_t *)malloc(len);
 
 	memcpy(reply_pkt, packet, len);
+	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
+	print_hdrs(packet, len);
+	print_hdrs(reply_pkt, len);
+	
+	
+	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
 
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);

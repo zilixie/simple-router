@@ -158,7 +158,7 @@ void handle_arp(struct sr_instance *sr,
 
 				replace_etnet_addrs(current_etnet_hdr, current_interface_pt->addr, arp_hdr->ar_sha);
 				print_hdrs(current_pkt->buf, current_pkt->len);
-				printf(current_pkt->iface->name)
+				printf(current_pkt->iface->name);
 				sr_send_packet(sr, current_pkt->buf, current_pkt->len, current_pkt->iface);
 				current_pkt = (*current_pkt).next;
 			}

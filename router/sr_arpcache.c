@@ -16,8 +16,89 @@
   checking whether we should resend an request or destroy the arp request.
   See the comments in the header file for an idea of what it should look like.
 */
+
+
+
+
+void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
+    struct sr_packet * packet = (struct sr_packet*)malloc(sizeof(struct sr_packet));
+    packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+    packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);
+    sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;
+    sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));
+
+    struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);
+    packet->iface = interface_to_send_on->name;
+    arp_header->ar_hrd = htons(arp_hrd_ethernet);
+    arp_header->ar_pro = htons(0x800);
+    arp_header->ar_hln = ETHER_ADDR_LEN;
+    arp_header->ar_pln = 4;
+    arp_header->ar_op = htons(arp_op_request);
+    arp_header->ar_tip = req->ip;
+    arp_header->ar_sip = interface_to_send_on->ip;
+    /* Reconfigure ARP src/dest targets */
+    
+    uint8_t all_one[6] = {-1, -1, -1, -1, -1, -1};
+
+    set_arp_sha_tha(arp_header, interface_to_send_on->addr, all_one);
+
+    /* Set Ethernet dest/src addrs */
+    set_ethernet_src_dst(ethernet_header, interface_to_send_on->addr, all_one);
+
+    ethernet_header->ether_type = htons(ethertype_arp);
+    sr_send_packet(sr, packet->buf, packet->len, packet->iface);
+    free(packet->buf);
+    free(packet);
+}
+
+
+void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
+    //struct sr_arpcache *cache = &(sr->cache);
+    //struct sr_if *currIface;
+    time_t current_time = time(0);
+    time_t last_sent = arp_req->sent;
+    uint32_t tiems_sent = arp_req->times_sent;
+    struct sr_packet *pkt_pt;
+
+
+    struct sr_arpcache *cache
+    
+    if (difftime(current_time, last_sent) > 1.0) {
+        if (tiems_sent >= 5) {
+            pkt_pt = arp_req->packets;          
+            while (pkt_pt) {
+                /* Send type 3 code 1 ICMP (Host Unreachable) */
+                send_icmp_t3_pkt(sr, pkt_pt, pkt_pt->iface, len, 3, 1);
+                pkt_pt = pkt_pt->next;
+            }
+            /* Destroy the request afterwards */
+            sr_arpreq_destroy(cache, req);
+            
+        } else {
+            /* send arp request */
+
+
+            send_arp_req(sr, arp_req);
+            current_time = time(NULL);
+            arp_req->sent = curtime;
+            arp_req->times_sent++;
+
+        }
+    }
+}
+
+
+
 void sr_arpcache_sweepreqs(struct sr_instance *sr) {
-	
+    struct sr_arpcache *arpcache = &(sr->cache);
+    struct sr_arpreq *req = arpcache->requests;
+    struct sr_arpreq *req_cp;
+
+    while(req) {
+        req_cp = req;
+        req = req->next;
+        handle_arpreq(sr, req_cp);
+    }
 }
 
 

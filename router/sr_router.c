@@ -243,7 +243,7 @@ void handle_ip(struct sr_instance* sr,
 
 	} else {
 		printf("packet to the router\n");
-		printf("%d\n", (int)ip_hdr->ip_p);
+		printf("%B\n", ip_hdr->ip_p == htons(ip_protocol_icmp));
 		if(ip_hdr->ip_p == htons(ip_protocol_icmp)){
 			sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (packet + etnet_hdr_size + ip_hdr_size);
 			if (icmp_hdr->icmp_type == (uint8_t) 8) {

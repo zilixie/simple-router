@@ -207,7 +207,7 @@ void handle_ip(struct sr_instance* sr,
 				/*add to the arp queue, and send a arp request ?*/
 				struct sr_arpreq * arp_req = sr_arpcache_queuereq(&sr->cache, ip_hdr->ip_dst, 
 										  packet, len, sender_interface_pt->name);
-				/*handle_arpreq(sr, arp_req);*/
+				handle_arpreq(sr, arp_req);
 				return;
 			}
 

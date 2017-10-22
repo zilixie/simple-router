@@ -51,7 +51,7 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     	/* Set Ethernet dest/src addrs */
     	replace_etnet_addrs(etnet_hdr, dst_interface->addr, broadcast_addr);
    	etnet_hdr->ether_type = htons(ethertype_arp);
-    	sr_send_packet(sr, pkt, arp_hdr_size + etnet_hdr_size, dst_interface);
+    	sr_send_packet(sr, pkt, arp_hdr_size + etnet_hdr_size, dst_interface->name);
     	free(pkt);
 }
 

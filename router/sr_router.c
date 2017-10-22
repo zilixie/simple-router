@@ -243,15 +243,14 @@ void handle_ip(struct sr_instance* sr,
 
 	} else {
 		printf("packet to the router\n");
-		printf("%d\n", ip_hdr->ip_p == ip_protocol_icmp);
 		if(ip_hdr->ip_p == ip_protocol_icmp){
+			printf("Router receives ICMP...\n");
 			sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (packet + etnet_hdr_size + ip_hdr_size);
 			if (icmp_hdr->icmp_type == (uint8_t) 8) {
 				send_icmp_t0_pkt(sr, packet, interface,len, 0, 0);
 			}
 
 		}else{
-			printf("%d\n", ip_hdr->ip_p == ip_protocol_icmp);
 			printf("Router receives TCP UDP...\n");
 			send_icmp_t3_pkt(sr,packet, interface, len, 3, 3); 
 		}
@@ -470,11 +469,6 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
 	uint8_t *reply_pkt = (uint8_t *)malloc(t3_icmp_size + etnet_hdr_size + ip_hdr_size);
-
-	memcpy(reply_pkt, packet, t3_icmp_size + etnet_hdr_size + ip_hdr_size);
-	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
-	
-	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
 
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);

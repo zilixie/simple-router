@@ -471,11 +471,8 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
 	uint8_t *reply_pkt = (uint8_t *)malloc(t3_icmp_size + etnet_hdr_size + ip_hdr_size);
 
-	memcpy(reply_pkt, packet, len);
+	memcpy(reply_pkt, packet, t3_icmp_size + etnet_hdr_size + ip_hdr_size);
 	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
-	print_hdrs(packet, len);
-	print_hdrs(reply_pkt, len);
-	
 	
 	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
 
@@ -485,11 +482,11 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 
 	/*construct icmp hdr*/
 	icmp_hdr_t3->icmp_type = (uint8_t) type;
-	icmp_hdr_t3->unused = (uint32_t) 0;
-	icmp_hdr_t3->icmp_sum = (uint16_t) 0;
+	icmp_hdr_t3->unused = 0;
+	icmp_hdr_t3->icmp_sum = 0;
 	icmp_hdr_t3->icmp_code = (uint8_t) code;
 	icmp_hdr_t3->next_mtu = 0;
-	memcpy(icmp_hdr_t3->data, ip_hdr, ip_hdr_size + 8);
+	memcpy(icmp_hdr_t3->data, ip_hdr, ICMP_DATA_SIZE);/**/
 	icmp_hdr_t3->icmp_sum = cksum(icmp_hdr_t3, t3_icmp_size);
 
 
@@ -503,8 +500,12 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	ip_hdr->ip_ttl = INIT_TTL;
 	ip_hdr->ip_p = ip_protocol_icmp;
 	ip_hdr->ip_sum = 0;
-
+	
+	/* wait to fix, code 0 */
 	ip_hdr->ip_src = received_ip_hdr->ip_dst;
+	
+	
+	
 	ip_hdr->ip_dst = received_ip_hdr->ip_src;
 	ip_hdr->ip_len = ip_hdr_size + t3_icmp_size;
 	ip_hdr->ip_id = 0;
@@ -517,8 +518,8 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	printf("\n\nsending t3 icmp\n\n");
-	print_hdrs(reply_pkt, len);
-	sr_send_packet(sr, reply_pkt, len, interface);
+	print_hdrs(reply_pkt, t3_icmp_size + etnet_hdr_size + ip_hdr_size);
+	sr_send_packet(sr, reply_pkt, t3_icmp_size + etnet_hdr_size + ip_hdr_size, interface);
 	free(reply_pkt);
 
 }

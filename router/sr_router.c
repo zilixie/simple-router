@@ -97,6 +97,8 @@ void sr_handlepacket(struct sr_instance* sr,
     	}
     	else if (ntohs((*etnet_hdr).ether_type) == ethertype_ip) {
     		printf("Receive IP \n\n");
+		handle_ip(sr, packet, len, interface);
+		return;
     	}
     /* fill in code here */
 

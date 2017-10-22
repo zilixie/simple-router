@@ -81,8 +81,8 @@ void send_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 
 
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
-    //struct sr_arpcache *cache = &(sr->cache);
-    //struct sr_if *currIface;
+    /*struct sr_arpcache *cache = &(sr->cache);*/
+    /*struct sr_if *currIface;*/
     time_t current_time = time(0);
     time_t last_sent = arp_req->sent;
     uint32_t tiems_sent = arp_req->times_sent;

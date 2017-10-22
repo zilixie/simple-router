@@ -372,7 +372,7 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 				char* interface,
 				unsigned int len,
 				int type, 
-				int code,){
+				int code){
 
 	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
 	int ip_hdr_size = sizeof(sr_ip_hdr_t);
@@ -434,7 +434,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 				char* interface,
 				unsigned int len,
 				int type, 
-				int code,){
+				int code){
 
 	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
 	int ip_hdr_size = sizeof(sr_ip_hdr_t);

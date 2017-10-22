@@ -89,18 +89,18 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
     struct sr_packet *pkt_pt;
 
 
-    struct sr_arpcache *cache
+    struct sr_arpcache *cache;
     
     if (difftime(current_time, last_sent) > 1.0) {
         if (tiems_sent >= 5) {
             pkt_pt = arp_req->packets;          
             while (pkt_pt) {
                 /* Send type 3 code 1 ICMP (Host Unreachable) */
-                send_icmp_t3_pkt(sr, pkt_pt, pkt_pt->iface, len, 3, 1);
+                send_icmp_t3_pkt(sr, pkt_pt, pkt_pt->iface, 0, 3, 1);
                 pkt_pt = pkt_pt->next;
             }
             /* Destroy the request afterwards */
-            sr_arpreq_destroy(cache, req);
+            sr_arpreq_destroy(cache, arp_req);
             
         } else {
             /* send arp request */
@@ -108,7 +108,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
 
             send_arp_req(sr, arp_req);
             current_time = time(NULL);
-            arp_req->sent = curtime;
+            arp_req->sent = current_time;
             arp_req->times_sent++;
 
         }

@@ -343,7 +343,7 @@ void send_icmp_t11_pkt(struct sr_instance* sr,
 	struct sr_if *sr_interface_pt = sr_get_interface(sr, interface);
 
 	uint8_t *reply_pkt = (uint8_t *)malloc(icmp_t11_size + etnet_hdr_size + ip_hdr_size);
-	memcpy(reply_pkt, packet, etnet_hdr_size + ip_hdr_size);
+	memset(reply_pkt,0, icmp_t11_size + etnet_hdr_size + ip_hdr_size);
 
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);
@@ -373,12 +373,11 @@ void send_icmp_t11_pkt(struct sr_instance* sr,
 
 	ip_hdr->ip_len = ip_hdr_size + icmp_t11_size;
 	ip_hdr->ip_id = 0;
-	ip_hdr->ip_tos = 0;
 	ip_hdr->ip_sum = cksum(ip_hdr, ip_hdr_size);
 
 	/*construct etnet hdr*/
-	memcpy(&(reply_etnet_hdr->ether_shost), &(sr_interface_pt->addr), ETHER_ADDR_LEN); 
-	memcpy(&(reply_etnet_hdr->ether_dhost), &(reply_etnet_hdr->ether_shost), ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_shost, sr_interface_pt->addr, ETHER_ADDR_LEN); 
+	memcpy(reply_etnet_hdr->ether_dhost, reply_etnet_hdr->ether_shost, ETHER_ADDR_LEN); 
 	reply_etnet_hdr->ether_type = htons(ethertype_ip);
 
 	int total_pkt_size = icmp_t11_size + etnet_hdr_size + ip_hdr_size;

@@ -368,7 +368,7 @@ void send_icmp_t11_pkt(struct sr_instance* sr,
 	ip_hdr->ip_sum = 0x0;
 
 	ip_hdr->ip_src = sr_interface_pt->ip;
-	ip_hdr->ip_dst = ip_hdr->ip_src;
+	ip_hdr->ip_dst = received_ip_hdr->ip_src;
 
 
 	ip_hdr->ip_len = ip_hdr_size + icmp_t11_size;

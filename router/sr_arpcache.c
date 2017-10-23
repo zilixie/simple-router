@@ -27,15 +27,6 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 	sr_arp_hdr_t * arp_hdr = (sr_arp_hdr_t *)(pkt + sizeof(sr_ethernet_hdr_t));	
 	
 	
-	
-    /*packet->buf = (uint8_t *)malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
-    /*packet->len = sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t);*/
-    /*sr_ethernet_hdr_t * ethernet_header = (sr_ethernet_hdr_t *)packet->buf;*/
-    /*sr_arp_hdr_t * arp_header = (sr_arp_hdr_t *)(packet->buf + sizeof(sr_ethernet_hdr_t));*/
-
-    /*struct sr_if * interface_to_send_on = sr_get_interface(sr, req->packets->iface);*/
-
-	
     	arp_hdr->ar_op = htons(arp_op_request);
     	arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
     	arp_hdr->ar_pro = htons(ethertype_ip);
@@ -43,12 +34,13 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
     	arp_hdr->ar_pln = sizeof(uint32_t);
     	arp_hdr->ar_tip = req->ip;
     	arp_hdr->ar_sip = dst_interface->ip;
-    	/* Reconfigure ARP src/dest targets */
+
+	
     
 	uint8_t broadcast_addr[ETHER_ADDR_LEN]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
     	replace_arp_hardware_addrs(arp_hdr, dst_interface->addr, broadcast_addr);
 
-    	/* Set Ethernet dest/src addrs */
+
     	replace_etnet_addrs(etnet_hdr, dst_interface->addr, broadcast_addr);
    	etnet_hdr->ether_type = htons(ethertype_arp);
     	sr_send_packet(sr, pkt, arp_hdr_size + etnet_hdr_size, dst_interface->name);

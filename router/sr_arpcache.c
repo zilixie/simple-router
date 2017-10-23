@@ -11,11 +11,6 @@
 #include "sr_if.h"
 #include "sr_protocol.h"
 
-/* 
-  This function gets called every second. For each request sent out, we keep
-  checking whether we should resend an request or destroy the arp request.
-  See the comments in the header file for an idea of what it should look like.
-*/
 
 void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 	int arp_hdr_size = sizeof(sr_arp_hdr_t);
@@ -78,8 +73,11 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* arp_req){
     	}
 }
 
-
-
+/* 
+  This function gets called every second. For each request sent out, we keep
+  checking whether we should resend an request or destroy the arp request.
+  See the comments in the header file for an idea of what it should look like.
+*/
 void sr_arpcache_sweepreqs(struct sr_instance *sr) {
     struct sr_arpcache *arpcache = &(sr->cache);
     struct sr_arpreq *req = arpcache->requests;

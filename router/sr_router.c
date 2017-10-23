@@ -354,7 +354,7 @@ void send_icmp_t11_pkt(struct sr_instance* sr,
 	icmp_hdr_t11->unused = (uint32_t) 0;
 	icmp_hdr_t11->icmp_sum = (uint16_t) 0;
 	icmp_hdr_t11->icmp_code = (uint8_t) 0;
-	memcpy(icmp_hdr_t11->data, ip_hdr, ip_hdr_size + 8);
+	memcpy(icmp_hdr_t11->data, received_ip_hdr, ICMP_DATA_SIZE);
 	icmp_hdr_t11->icmp_sum = cksum(icmp_hdr_t11, icmp_t11_size);
 
 	/*construct ip hdr*/

@@ -486,12 +486,12 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	ip_hdr->ip_sum = 0;
 	
 	/* wait to fix, code 0 */
-	if (ip_in_sr_interface_list(sr, received_ip_hdr->ip_dst)) {
-		ip_hdr->ip_src = received_ip_hdr->ip_dst;
-	} else {
+	if (code == 0) {
 		ip_hdr->ip_src = sr_interface_pt->ip;
 	}
-	
+	else {
+		ip_hdr->ip_src = received_ip_hdr->ip_dst;
+	}
 	
 	
 	ip_hdr->ip_dst = received_ip_hdr->ip_src;

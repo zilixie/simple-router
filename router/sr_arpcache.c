@@ -24,7 +24,7 @@ void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
 	
     	arp_hdr->ar_op = htons(arp_op_request);
     	arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
-    	arp_hdr->ar_pro = htons(ethertype_arp);
+    	arp_hdr->ar_pro = htons(ethertype_ip);
     	arp_hdr->ar_hln = ETHER_ADDR_LEN;
     	arp_hdr->ar_pln = sizeof(uint32_t);
     	arp_hdr->ar_tip = req->ip;

@@ -22,7 +22,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* req){
     	struct sr_packet *pkt_pt;
 
 
-    	if (difftime(now, last_sent) > 1.0) {
+    	if (difftime(now, last_sent) >= 1) {
         	if (times_sent >= 5) {
             		pkt_pt = req->packets;          
            		while (pkt_pt != NULL) {

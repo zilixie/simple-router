@@ -35,20 +35,20 @@
 void sr_init(struct sr_instance* sr)
 {
 	/* REQUIRES */
-    	assert(sr);
+	assert(sr);
 
-    	/* Initialize cache and cache cleanup thread */
-    	sr_arpcache_init(&(sr->cache));
+	/* Initialize cache and cache cleanup thread */
+	sr_arpcache_init(&(sr->cache));
 
-    	pthread_attr_init(&(sr->attr));
-    	pthread_attr_setdetachstate(&(sr->attr), PTHREAD_CREATE_JOINABLE);
-    	pthread_attr_setscope(&(sr->attr), PTHREAD_SCOPE_SYSTEM);
-    	pthread_attr_setscope(&(sr->attr), PTHREAD_SCOPE_SYSTEM);
-    	pthread_t thread;
+	pthread_attr_init(&(sr->attr));
+	pthread_attr_setdetachstate(&(sr->attr), PTHREAD_CREATE_JOINABLE);
+	pthread_attr_setscope(&(sr->attr), PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setscope(&(sr->attr), PTHREAD_SCOPE_SYSTEM);
+	pthread_t thread;
 
-    	pthread_create(&thread, &(sr->attr), sr_arpcache_timeout, sr);
+	pthread_create(&thread, &(sr->attr), sr_arpcache_timeout, sr);
     
-    	/* Add initialization code here! */
+	/* Add initialization code here! */
 
 } /* -- sr_init -- */
 

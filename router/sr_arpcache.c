@@ -12,46 +12,17 @@
 #include "sr_protocol.h"
 
 
-void open_arp_req(struct sr_instance* sr, struct sr_arpreq * req) {
-	int arp_hdr_size = sizeof(sr_arp_hdr_t);
-	int etnet_hdr_size = sizeof(sr_ethernet_hdr_t);
-
-	struct sr_if *dst_interface = sr_get_interface(sr, req->packets->iface);
-	uint8_t * pkt = (uint8_t *)malloc(arp_hdr_size + etnet_hdr_size);
-	sr_ethernet_hdr_t * etnet_hdr = (sr_ethernet_hdr_t *)pkt;
-	sr_arp_hdr_t * arp_hdr = (sr_arp_hdr_t *)(pkt + sizeof(sr_ethernet_hdr_t));	
-	
-	
-    	arp_hdr->ar_op = htons(arp_op_request);
-    	arp_hdr->ar_hrd = htons(arp_hrd_ethernet);
-    	arp_hdr->ar_pro = htons(ethertype_ip);
-    	arp_hdr->ar_hln = ETHER_ADDR_LEN;
-    	arp_hdr->ar_pln = sizeof(uint32_t);
-    	arp_hdr->ar_tip = req->ip;
-    	arp_hdr->ar_sip = dst_interface->ip;
-
-	
-	uint8_t broadcast_addr[ETHER_ADDR_LEN]  = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
-	etnet_hdr->ether_type = htons(ethertype_arp);
-    	replace_arp_hardware_addrs(arp_hdr, dst_interface->addr, broadcast_addr);
-    	replace_etnet_addrs(etnet_hdr, dst_interface->addr, broadcast_addr);
-    	sr_send_packet(sr, pkt, arp_hdr_size + etnet_hdr_size, dst_interface->name);
-	
-    	free(pkt);
-}
-
-
 
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* req){
     	struct sr_arpcache *cache = &(sr->cache);
     	/*struct sr_if *currIface;*/
-    	time_t current_time = time(0);
+    	time_t now = time(0);
     	time_t last_sent = req->sent;
     	uint32_t times_sent = req->times_sent;
     	struct sr_packet *pkt_pt;
 
 
-    	if (difftime(current_time, last_sent) > 1.0) {
+    	if (difftime(now, last_sent) > 1.0) {
         	if (times_sent >= 5) {
             		pkt_pt = req->packets;          
            		while (pkt_pt != NULL) {
@@ -90,7 +61,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq* req){
 
 			free(pkt);
         	}
-	        req->sent = current_time;
+	        req->sent = now;
             	req->times_sent++;
     	}
 }

@@ -107,7 +107,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		handle_ip(sr, packet, len, interface);
 		return;
     	}
-    /* fill in code here */
+    	/* fill in code here */
 
 }/* end sr_ForwardPacket */
 
@@ -121,11 +121,11 @@ void handle_arp(struct sr_instance *sr,
 	int ip_hdr_size = sizeof(sr_ip_hdr_t);
 
 	if (len < etnet_hdr_size + ip_hdr_size){
-		/*Send ICMP Msg*/
+		printf("Router received invalid length\n\n");
         	return;
 	}
-
 	sr_arp_hdr_t *arp_hdr = (sr_arp_hdr_t *)(packet + etnet_hdr_size);
+	
 	/*arp request*/
 	if (ntohs(arp_hdr->ar_op) == arp_op_request){
 		uint8_t *reply_pkt = (uint8_t *)malloc(ip_hdr_size + etnet_hdr_size);
@@ -133,7 +133,6 @@ void handle_arp(struct sr_instance *sr,
 		/*reply headers*/
 		sr_ethernet_hdr_t *reply_etnet_hdr = (sr_ethernet_hdr_t *)reply_pkt;
 		sr_arp_hdr_t *reply_arp_hdr = (sr_arp_hdr_t *)(reply_pkt + etnet_hdr_size);
-
 		struct sr_if *interface_pt = sr_get_interface(sr, interface);
 
 		reply_arp_hdr->ar_hrd = arp_hdr->ar_hrd;
@@ -201,7 +200,7 @@ void handle_ip(struct sr_instance* sr,
 		return;	
 	}
 
-	/* router is not the receiver*/
+	/* Router is not the receiver*/
 	if (!ip_in_sr_interface_list(sr, ip_hdr->ip_dst)) {
 
 		ip_hdr->ip_ttl--;
@@ -214,15 +213,15 @@ void handle_ip(struct sr_instance* sr,
 		struct sr_rt *rt_entry = rt_entry_lpm(sr, ip_hdr->ip_dst);
 
 		if (rt_entry != NULL) {
-			/*outgoing interface*/
+			/* Outgoing interface*/
 			struct sr_if *sender_interface_pt = sr_get_interface(sr, rt_entry->interface);
 
-			/* look up the cache to find arpentry*/
+			/* Look up the cache to find arpentry*/
 			struct sr_arpentry *arp_entry = sr_arpcache_lookup(&sr->cache, rt_entry->gw.s_addr);
 
 			/*not found*/
 			if (arp_entry == NULL) {
-				/*add to the arp queue, and send a arp request ?*/
+				/* Add to the arp queue */
 				struct sr_arpreq * arp_req = sr_arpcache_queuereq(&sr->cache, ip_hdr->ip_dst, 
 										  packet, len, sender_interface_pt->name);
 				handle_arpreq(sr, arp_req);
@@ -231,7 +230,7 @@ void handle_ip(struct sr_instance* sr,
 
 			else if (arp_entry != NULL){
 
-				/*prepare for ethernet header*/
+				/*Construct ethernet header*/
 				sr_ethernet_hdr_t * etnet_hdr;
 				etnet_hdr = (sr_ethernet_hdr_t *)packet;
 
@@ -244,7 +243,7 @@ void handle_ip(struct sr_instance* sr,
 			send_icmp_t3_pkt(sr,packet, interface, len, 3, 0);
 			return;
 		}
-
+	/* Router is the receiver*/
 	} else {
 		printf("packet to the router\n");
 		if(ip_hdr->ip_p == ip_protocol_icmp){
@@ -289,23 +288,25 @@ int validate_ip_cksum (uint8_t * packet) {
 
 
 struct sr_rt* rt_entry_lpm(struct sr_instance *sr, uint32_t ip_dst){
-    	struct sr_rt* routing_table = sr->routing_table;
+    	struct sr_rt* rt = sr->routing_table;
 	struct sr_rt* longest_match = NULL;
 
     	uint32_t curr_mask = 0;
     
-    	while(routing_table)
+    	while(rt)
     	{
-        	if(longest_match == NULL || routing_table->mask.s_addr > curr_mask)
+        	if(longest_match == NULL || rt->mask.s_addr > curr_mask)
         	{
-        		uint32_t mask = routing_table->mask.s_addr;
-            		if ((ip_dst & mask) == (routing_table->dest.s_addr & mask))
+        		uint32_t mask = rt->mask.s_addr;
+            		if ((ip_dst & mask) == (rt->dest.s_addr & mask))
             		{
-            			longest_match = routing_table;
-                		curr_mask = routing_table->mask.s_addr;
+            			longest_match = rt;
+                		curr_mask = rt->mask.s_addr;
             		} 
-        	}
-        	routing_table = routing_table->next;
+			rt = rt->next;
+        	} else {
+			rt = rt->next;
+		}
     	}
     	return longest_match;
 }
@@ -406,13 +407,6 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	uint8_t *reply_pkt = (uint8_t *)malloc(len);
 
 	memcpy(reply_pkt, packet, len);
-	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
-	print_hdrs(packet, len);
-	print_hdrs(reply_pkt, len);
-	
-	
-	printf("\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n");
-
 	sr_ethernet_hdr_t * reply_etnet_hdr = (sr_ethernet_hdr_t *) reply_pkt;
 	sr_ip_hdr_t * ip_hdr = (sr_ip_hdr_t *) (reply_pkt + etnet_hdr_size);
 	sr_icmp_hdr_t * icmp_hdr = (sr_icmp_hdr_t *) (reply_pkt + etnet_hdr_size + ip_hdr_size);
@@ -424,11 +418,6 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	icmp_hdr->icmp_sum = cksum(icmp_hdr, len - ip_hdr_size - etnet_hdr_size);
 
 	/*construct ip hdr*/
-
-	/*ip_hdr->ip_hl = received_ip_hdr->ip_hl;
-	ip_hdr->ip_v = received_ip_hdr->ip_v;
-	ip_hdr->ip_tos = received_ip_hdr->ip_tos;
-	ip_hdr->ip_off = received_ip_hdr->ip_off;*/
 	
 	ip_hdr->ip_ttl = INIT_TTL;
 	/*ip_hdr->ip_p = ip_protocol_icmp;*/
@@ -451,8 +440,6 @@ void send_icmp_t0_pkt(struct sr_instance* sr,
 	free(reply_pkt);
 
 }
-
-
 
 
 void send_icmp_t3_pkt(struct sr_instance* sr, 

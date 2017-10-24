@@ -486,7 +486,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 	ip_hdr->ip_sum = 0;
 	
 	/* wait to fix, code 0 */
-	if (code == 0) {
+	if (code == 0 || code == 1) {
 		ip_hdr->ip_src = sr_interface_pt->ip;
 	}
 	else {

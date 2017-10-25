@@ -507,14 +507,7 @@ void send_icmp_t3_pkt(struct sr_instance* sr,
 
 	printf("\n\nsending t3 icmp\n\n");
 	print_hdrs(reply_pkt, t3_icmp_size + etnet_hdr_size + ip_hdr_size);
-	sr_rt *out_rt = rt_entry_lpm(sr, ip_hdr->ip_dst);
-	char *out_interface = out_rt->interface;
-	if (out_interface == NULL) {
-		printf("sent_icmp_t3_pkt: out_interface not found.\n");
-		free(reply_pkt);
-		return;
-	}
-	sr_send_packet(sr, reply_pkt, t3_icmp_size + etnet_hdr_size + ip_hdr_size, out_interface);
+	sr_send_packet(sr, reply_pkt, t3_icmp_size + etnet_hdr_size + ip_hdr_size, interface);
 	free(reply_pkt);
 }
 
